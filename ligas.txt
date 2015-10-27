@@ -1,0 +1,4 @@
+http://bconnelly.net/working-with-csvs-on-the-command-line/
+http://alignedleft.com/tutorials/d3/making-a-scatterplot
+http://flowingdata.com/2014/10/15/linked-small-multiples/
+http://vallandingham.me/scroller.html
