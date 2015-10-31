@@ -1,3 +1,4 @@
+http://stackoverflow.com/questions/471183/linux-command-line-global-search-and-replace
 http://bconnelly.net/working-with-csvs-on-the-command-line/
 http://alignedleft.com/tutorials/d3/making-a-scatterplot
 http://flowingdata.com/2014/10/15/linked-small-multiples/
