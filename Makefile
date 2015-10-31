@@ -20,7 +20,7 @@ eurusd-2015-01.csv: EURUSD-2015-01.zip
 	cat date.csv | tr " " "," > date1.csv
 	paste -d , parity.csv date1.csv rest.csv > eurusd-2015-01.csv
 	rm parity.csv date.csv date1.csv rest.csv EURUSD-2015-01.csv
-	
+	perl -p -i -e 's/201501/2015-01-/g' eurusd-2015-01.csv ## Éste comando  modifica línea por línea: 's/antes/después/g'	
 
 EURUSD-2015-01.zip:
 	curl -o EURUSD-2015-01.zip "http://truefx.com/dev/data/2015/JANUARY-2015/EURUSD-2015-01.zip"
