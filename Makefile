@@ -1,22 +1,30 @@
-eurusd-2015-01.csv: EURUSD-2015-01.zip
-	unzip EURUSD-2015-01.zip
-	rm EURUSD-2015-01.zip
-	cut -d , -f 1 EURUSD-2015-01.csv > parity.csv
-	cut -d , -f 2 EURUSD-2015-01.csv > date.csv
-	cut -d , -f 3,4 EURUSD-2015-01.csv > rest.csv
+PARITY=EURUSD
+YEAR=2015
+MONTH1=03
+MONTH2=MARCH
+
+2: 1
+	unzip file.zip
+	rm file.zip
+	cut -d , -f 1 ${PARITY}-${YEAR}-${MONTH1}.csv > parity.csv
+	cut -d , -f 2 ${PARITY}-${YEAR}-${MONTH1}.csv > date.csv
+	cut -d , -f 3,4 ${PARITY}-${YEAR}-${MONTH1}.csv > rest.csv
 	cat date.csv | tr " " "," > date1.csv
 	cat date1.csv | tr ":" "," > date2.csv
 	cat date2.csv | tr "." "," > date3.csv
-	paste -d , parity.csv date3.csv rest.csv > Eurusd-2015-01.csv
-	rm parity.csv date* rest.csv EURUSD-2015-01.csv
-	perl -p -i -e 's/201501/2015,01,/g' Eurusd-2015-01.csv ## Éste comando  modifica línea por línea: 's/antes/después/g'
+	paste -d , parity.csv date3.csv rest.csv > FILE.csv
+	rm parity.csv date* rest.csv ${PARITY}-${YEAR}-${MONTH1}.csv
+	perl -p -i -e 's/${YEAR}${MONTH1}/${YEAR},${MONTH1},/g' FILE.csv ## Éste comando  modifica línea por línea: 's/antes/después/g'
 	echo "currency,year,month,day,hour,minutes,seconds,ms,bid,ask" > head.csv
-	cat head.csv Eurusd-2015-01.csv > eurusd-2015-01.csv
-	rm Eurusd-2015-01.csv head.csv
+	cat head.csv FILE.csv > file.csv
+	rm FILE.csv head.csv
+	touch 2
 		
 
-EURUSD-2015-01.zip:
-	curl -o EURUSD-2015-01.zip "http://truefx.com/dev/data/2015/JANUARY-2015/EURUSD-2015-01.zip"
+1:
+	touch 1
+	curl -o file.zip "http://truefx.com/dev/data/${YEAR}/${MONTH2}-${YEAR}/\
+	${PARITY}-${YEAR}-${MONTH1}.zip"
 
 
 package.json:
@@ -32,4 +40,4 @@ package.json:
 	npm install
 
 clean:
-	rm eurusd-2015-01.csv -r node_modules package.json
+	rm 1 2 *.csv
