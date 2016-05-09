@@ -5,10 +5,12 @@ eurusd-2015-01.csv: EURUSD-2015-01.zip
 	cut -d , -f 2 EURUSD-2015-01.csv > date.csv
 	cut -d , -f 3,4 EURUSD-2015-01.csv > rest.csv
 	cat date.csv | tr " " "," > date1.csv
-	paste -d , parity.csv date1.csv rest.csv > Eurusd-2015-01.csv
-	rm parity.csv date.csv date1.csv rest.csv EURUSD-2015-01.csv
-	perl -p -i -e 's/201501/2015-01-/g' Eurusd-2015-01.csv ## Éste comando  modifica línea por línea: 's/antes/después/g'
-	echo "currency,date,time,bid,ask" > head.csv
+	cat date1.csv | tr ":" "," > date2.csv
+	cat date2.csv | tr "." "," > date3.csv
+	paste -d , parity.csv date3.csv rest.csv > Eurusd-2015-01.csv
+	rm parity.csv date* rest.csv EURUSD-2015-01.csv
+	perl -p -i -e 's/201501/2015,01,/g' Eurusd-2015-01.csv ## Éste comando  modifica línea por línea: 's/antes/después/g'
+	echo "currency,year,month,day,hour,minutes,seconds,ms,bid,ask" > head.csv
 	cat head.csv Eurusd-2015-01.csv > eurusd-2015-01.csv
 	rm Eurusd-2015-01.csv head.csv
 		
