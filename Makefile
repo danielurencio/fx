@@ -1,7 +1,7 @@
 PARITY=EURUSD
-YEAR=2015
-MONTH1=03
-MONTH2=MARCH
+YEAR=2010
+MONTH1=08
+MONTH2=AUGUST
 
 2: 1
 	unzip file.zip
@@ -26,6 +26,8 @@ MONTH2=MARCH
 	curl -o file.zip "http://truefx.com/dev/data/${YEAR}/${MONTH2}-${YEAR}/\
 	${PARITY}-${YEAR}-${MONTH1}.zip"
 
+mongoimport:
+	mongoimport --file file.csv --type csv --headerline -d fx -c ${PARITY}
 
 package.json:
 	echo '{' > package.json
