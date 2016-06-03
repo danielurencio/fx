@@ -8,11 +8,11 @@ for e in ${YEARS[@]}
 	    do a=`expr ${i} + 1`; 
 	    if [ `expr length ${a}` = 1 ]; then
 		make PARITY=GBPUSD MONTH1=${c}${a} MONTH2=${MONTHS[$i]} YEAR=$e
-		make mongoimport PARITY=GBPUSD
+		make mongoimport PARITY=EURUSD
 		make clean
 	    else 
 		make PARITY=GBPUSD MONTH1=${a} MONTH2=${MONTHS[$i]} YEAR=$e
-		make mongoimport PARITY=GBPUSD
+		make mongoimport PARITY=EURUSD
 		make clean
 	    fi
 	done
