@@ -1,6 +1,6 @@
 var conn = new Mongo();
 db = conn.getDB("fx");
-
+/*
 function a(collection) {
     return db.getCollection(collection).aggregate([
 	{ $match: { year: 2010, month:1 } },
@@ -17,34 +17,46 @@ function a(collection) {
 	{ $out: "eurusd_hourly" }
 	]);
 }
+*/
+function date(collection,y,m) {
+  var start = Date();
+  var docs = [];
+  print(collection, y, m);
 
-function date(collection) {
-    var ids = [], docs = [];
+  for(var d=1; d<32; d++) {
+  
+    print(Date() + " Pushing documents to array. Day: " + d);
 
-    //return
-     db.getCollection(collection).find({}).forEach(
+     db.getCollection(collection).find({year:y,month:m,day:d}).forEach(
 	function(d) {
 	  var a = d;
-//	  var id = a._id;
 	  a.date = new Date(a.year,a.month-1,a.day,a.hour,a.minutes,a.seconds,a.ms);
 	  a.weekday = a.date.getDay();
-	  //ids.push(id); 
 	  docs.push(a);
-	
-//    print(array[array.length-1]);
-    });
-    print(docs.length);
+        });
 
-    db.getCollection(collection).drop();
+//    print(docs.length);
 
-    var bulk = db.AUDUSD.initializeUnorderedBulkOp();
+//    db.getCollection(collection).drop();
+
+    var smallcaps = collection.toLowerCase();
+    var bulk = db.getCollection(smallcaps).initializeUnorderedBulkOp();
+    print(Date() + " Adding documents to 'bulk'.");
     
     for(var i=0; i<docs.length; i++) {
 	bulk.insert(docs[i]);
     }
 
+    print(Date() + " Executing 'bulk' now.");
     bulk.execute();
 
-    print("Done!");
+    print(Date() + " Done!");
+    print(docs.length);
+    docs = [];
+  }
 
+  var end = Date();
+
+  print("Started at: " + start);
+  print("Ended at: " + end);
 }
