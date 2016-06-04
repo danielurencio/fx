@@ -17,3 +17,34 @@ function a(collection) {
 	{ $out: "eurusd_hourly" }
 	]);
 }
+
+function date(collection) {
+    var ids = [], docs = [];
+
+    //return
+     db.getCollection(collection).find({}).forEach(
+	function(d) {
+	  var a = d;
+//	  var id = a._id;
+	  a.date = new Date(a.year,a.month-1,a.day,a.hour,a.minutes,a.seconds,a.ms);
+	  a.weekday = a.date.getDay();
+	  //ids.push(id); 
+	  docs.push(a);
+	
+//    print(array[array.length-1]);
+    });
+    print(docs.length);
+
+    db.getCollection(collection).drop();
+
+    var bulk = db.AUDUSD.initializeUnorderedBulkOp();
+    
+    for(var i=0; i<docs.length; i++) {
+	bulk.insert(docs[i]);
+    }
+
+    bulk.execute();
+
+    print("Done!");
+
+}
