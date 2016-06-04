@@ -25,12 +25,12 @@ function date(collection,y,m) {
 
   for(var d=1; d<32; d++) {
   
-    print(Date() + " Pushing documents to array. Day: " + d);
+    print(Date() + " Pushing documens: " + y + "/" + m + "/" + d);
 
      db.getCollection(collection).find({year:y,month:m,day:d}).forEach(
 	function(d) {
 	  var a = d;
-	  a.date = new Date(a.year,a.month-1,a.day,a.hour,a.minutes,a.seconds,a.ms);
+	  a.date = new Date(a.year,a.month-1,a.day,a.hour-5,a.minutes,a.seconds,a.ms);
 	  a.weekday = a.date.getDay();
 	  docs.push(a);
         });
