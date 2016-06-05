@@ -18,16 +18,16 @@ function a(collection) {
 	]);
 }
 */
-function date(collection,y,m) {
+function date(collection) {
   var start = Date();
   var docs = [];
-  print(collection, y, m);
+  print(collection);
 
   for(var d=1; d<32; d++) {
   
-    print(Date() + " Pushing documens: " + y + "/" + m + "/" + d);
+    print(Date() + " Pushing documens: " + d);//y + "/" + m + "/" + d);
 
-     db.getCollection(collection).find({year:y,month:m,day:d}).forEach(
+     db.getCollection(collection).find({day:d}).forEach(
 	function(d) {
 	  var a = d;
 	  a.date = new Date(a.year,a.month-1,a.day,a.hour-5,a.minutes,a.seconds,a.ms);
@@ -35,7 +35,7 @@ function date(collection,y,m) {
 	  docs.push(a);
         });
 
-//    print(docs.length);
+    print("Date: ", docs[0].year, docs[0].month);
 
 //    db.getCollection(collection).drop();
 
@@ -56,7 +56,9 @@ function date(collection,y,m) {
   }
 
   var end = Date();
-
+  db.getCollection(collection).drop();
   print("Started at: " + start);
   print("Ended at: " + end);
 }
+
+date("EURUSD");

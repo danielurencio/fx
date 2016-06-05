@@ -10,10 +10,12 @@ for e in ${YEARS[@]}
 		make PARITY=EURUSD MONTH1=${c}${a} MONTH2=${MONTHS[$i]} YEAR=$e
 		make mongoimport PARITY=EURUSD
 		make clean
+		mongo file.js
 	    else 
 		make PARITY=EURUSD MONTH1=${a} MONTH2=${MONTHS[$i]} YEAR=$e
 		make mongoimport PARITY=EURUSD
 		make clean
+		mongo file.js
 	    fi
 	done
 done
