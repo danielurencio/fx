@@ -35,7 +35,8 @@ function date(collection) {
 	  docs.push(a);
         });
 
-    print("Date: ", docs[0].year, docs[0].month);
+//    var D = docs[0];
+//    print("Date: ", D.year, D.month);
 
 //    db.getCollection(collection).drop();
 
@@ -61,4 +62,4 @@ function date(collection) {
   print("Ended at: " + end);
 }
 
-date("EURUSD");
+date("USDJPY");
