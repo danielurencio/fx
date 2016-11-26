@@ -1,27 +1,62 @@
-//function wma() {
+<<<<<<< HEAD
+function wma() {
 var l = db.eurusd_h.find().count();
+=======
+function Study(db,collection) {
+  var connection = new Mongo().getDB(db);
+  this.c = connection.getCollection(collection);
+};
+>>>>>>> 4ed993ae789ced76494030ffc239a97a41b49cbe
 
-//for(var i = 0; i<l; i++) {
-var a = db.eurusd_h.aggregate([
-{ $sort: { year:-1, month:-1, day:-1, hour:-1 } },
-{ $skip:i },
-{ $limit: 8 }
-]).toArray()
+Study.prototype.count = function() {
+  print(this.c.find().count());
+};
 
-for(var i in a) { a[i].n = a.length - i; };
+Study.prototype.wma = function(n) {
+  var l = this.c.find().count();
+  print("Going through " + l + " documents.");
+  var bulk = this.c.initializeUnorderedBulkOp();
+  print("Initilized unordered bulk operation.");
 
-var c= a.map(function(d) { return d.n; }).reduce(function sum(a,b) { return a + b; },0);
+  var conteiner = [];
 
-var b = [];
+  for(var j = 0; j<l; j++) {
 
-for(var i in a) { b.push( a[i].bid * ( a[i].n / c ) ); };
+    var a = this.c.aggregate([
+      { $sort: { year:-1, month:-1, day:-1, hour:-1 } },
+      { $skip:j },
+      { $limit: n }
+    ]).toArray();
 
-var result = b.reduce(function sum(a,b) { return a + b; }, 0);
+    for(var i in a) { a[i].n = a.length - i; };
 
-db.eurusd_h.update({ _id:a[0]._id },{ $set: { wma: result } });
-//}
+    var triangularSum = a.map(function(d) { return d.n; })
+     .reduce(function sum(a,b) { return a + b; },0);
 
-//}
+<<<<<<< HEAD
+=======
+    var b = [];
+
+    for(var i in a) { b.push( a[i].bid * ( a[i].n / triangularSum ) ); };
+
+    var result = b.reduce(function sum(a,b) { return a + b; }, 0);
+
+ //   conteiner.push({ _id:a[0]._id, wma: result });
+    bulk.find({ _id:a[0]._id }).update({ $set: { "wma": result } });
+
+    print("Added document " + j + " to bulk.");
+
+  };
+
+/*  for(var i in conteiner) {
+    bulk.find({ _id:conteiner[i]._id })
+	.udpate({ $set: { wma: conteiner[i] } });
+  };
+*/
+  print("Executin the whole bulk now.");
+  bulk.execute();
+>>>>>>> 4ed993ae789ced76494030ffc239a97a41b49cbe
+}
 
 function ma(n) {
   for(var i=0; i<docss.length; i++) {

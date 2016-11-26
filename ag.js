@@ -38,10 +38,10 @@ function hours(collection) {
 }
 
 function ma() {
-db.eurusd_h.aggregate([
-   { $sort: { year:-1, month:-1, day:-1, hour:-1} },
-   { $skip: 0 },
-   { $limit: 8 },
-    { $group: { _id:0, ma: { $avg: "$bid" } } }
-])
-}
+  db.eurusd_h.aggregate([
+     { $sort: { year:-1, month:-1, day:-1, hour:-1} },
+     { $skip: 0 },
+     { $limit: 8 },
+     { $group: { _id:0, ma: { $avg: "$bid" } } }
+  ]);
+};
