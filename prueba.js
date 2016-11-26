@@ -1,40 +1,16 @@
 var conn = new Mongo();
 var db = conn.getDB("fx");
 
-function Study(year,month,day) {
+function Study(year,month) {
   this.year = year;
   this.month = month;
-  this.day = day;
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+/////// FILTRAR
+///////////////////////////////////////////////////////////////////////////////
 
-function filter(y,m,d) {
-
-var array = [];
-
- for(var j=0; j<24; j++) {
-
-  var secs = 59;
-  var a = db.EURUSD.find({ year:y, month:m, day:d, hour:j, minutes:59, seconds:secs }).sort({ ms:-1 }).limit(1).toArray()[0];
-
-  while(a == undefined) {
-   secs--;
-  if(secs<0) break;
-
-   a = db.EURUSD.find({ year:y, month:m, day:d, hour:j, minutes:59, seconds:secs }).sort({ ms:-1 }).limit(1).toArray()[0];
-
-
- }
-
-  if( a != undefined ) array.push(a);
-
- }
-
- return array;
-}
-
-////////////////////////////
-Study.prototype.filter = function(y,m,d) {
+Study.prototype.Filter = function(y,m,d) {
 
 var array = [];
 
@@ -61,13 +37,18 @@ var array = [];
  return array;
 };
 
+/////////////////////////////////////////////////////////////////////////////////
+//////// OBTENER DÍAS ÚTILES
+//////////////////////////////////////////////////////////////////////////////
 
-Study.prototype.order = function(month,year) {
+Study.prototype.order = function() {
  var array = [];
+ print("Calibrando..");
+
  for(var i=1; i<32; i++) {
-  var day = this.filter(year,month,i);
+  var day = this.Filter(this.year,this.month,i);
   array.push({ horas:day.length, dia:i });
-  print(day.length,i);
+//  print(day.length,i);
  }
 
 var dias = ["lunes","martes","miércoles","jueves","viernes","sábado","domingo"];
@@ -91,17 +72,75 @@ var c = 0;
 
 
  array = array.filter(function(d) { return !d.is == false; });
+
+ array.forEach(function(d) {
+  delete d.horas;
+ });
  
+ if( b[0] == 0 ) {
+  b = b.map(function(d) { return d + 1; });
+ }
+
  var obj = {};
  b.forEach(function(d) {
   obj[String(d)] = array.filter(function(e) { return e.is == d; });
  });
  
  obj.todos = array;
- print(b);
 
- return obj;
+ this.dias = obj;
+ this.semanas = b.length;
+
+ print("¡Listo!");
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+///////// GENERATE DATASET
+///////////////////////////////////////////////////////////////////////////////
+
+Study.prototype.DATA = function(k) {
+ var b = [];
+ var dias = this.dias[k].map(function(d) { return d.dia; });
+
+  for(var i in dias) {
+    if( i == 0 ) {
+      b = this.Filter(this.year,this.month,dias[i]);
+    } else {
+      b = b.concat(this.Filter(this.year,this.month,dias[i]));
+    }
+  };
+
+  return b;
 }
 
 
-Study.prototype.hola = function() { print("hola"); }
+//////////////////////////////////////////////////////////////////////////
+/////// ADD SIMPLE MOVING AVERAGES TO DATASET
+////////////////////////////////////////////////////////////////////////
+
+Study.prototype.SMA = function(b,n) {
+
+  var c = b.length - 1;
+
+  while( c >= n ) {
+    var arr = [];
+    for(var i=0; i<n; i++) {
+      arr.push( b[c-i].bid );
+    }
+
+    var ma = arr.reduce(function sum(a,b) { return a + b; }) / arr.length;
+    b[c]["ma" + n] = ma;
+    c--;
+  }
+
+// return b;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+/////  MA CROSSOVER
+////////////////////////////////////////////////////////////////////////////
+
+Study.prototype.CROSSOVER = function(a,b) {
+ 
+}
