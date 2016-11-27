@@ -47,6 +47,7 @@ Study.prototype.order = function() {
  if( orden != 0 ) {
   var info = db.order.find({ año: this.year, mes:this.month }).toArray()[0];
   this.dias = info.dias;
+  this.semanas = info.semanas;
  } else {
  var array = [];
 // print("Calibrando..");
@@ -118,7 +119,7 @@ Study.prototype.DATA = function(k) {
     }
   };
 
-  return b;
+  this.data = b; //return b
 }
 
 
@@ -126,18 +127,18 @@ Study.prototype.DATA = function(k) {
 /////// ADD SIMPLE MOVING AVERAGES TO DATASET
 ////////////////////////////////////////////////////////////////////////
 
-Study.prototype.SMA = function(data,n) {
+Study.prototype.SMA = function(n) {
 
-  var c = data.length - 1;
+  var c = this.data.length - 1;
 
   while( c >= n ) {
     var arr = [];
     for(var i=0; i<n; i++) {
-      arr.push( data[c-i].bid );
+      arr.push( this.data[c-i].bid );
     }
 
     var ma = arr.reduce(function sum(a,b) { return a + b; }) / arr.length;
-    data[c]["ma" + n] = ma;
+    this.data[c]["ma" + n] = ma;
     c--;
   }
 
@@ -150,11 +151,61 @@ Study.prototype.SMA = function(data,n) {
 ////////////////////////////////////////////////////////////////////////////
 
 Study.prototype.CROSSOVER = function(a,b) {
- 
+ var largeMA, not, goForward = false;
+ if(a > b) { largeMA=a;not=b; } else { largeMA=b;not=a; }
+ var check = this.data.filter(function(d) { return d["ma" + largeMA]; }).length;
+ check != 0 ? doCross(largeMA,this.data):print("No such MA: " + largeMA);
+
+ function doCross(largeMA,data) {
+  var f = data.filter(function(d) { return d["ma" + largeMA]; });
+  var checkAgain = data.filter(function(d) { return d["ma" + not]; }).length;
+  checkAgain != 0 ? goForward=true : print("No such MA: " + not);
+ }
+
+ if(goForward) {
+ //  print("ready to check crosses!");
+  this.data = this.data.filter(function(d) { return d["ma" + largeMA]; });
+
+  for(var i in this.data) {
+   var upCondition = this.data[i].ma8 > this.data[i].ma24 && this.data[i-1]
+                  && this.data[i-1].ma8 < this.data[i-1].ma24;
+
+   var downCondition = this.data[i].ma8 < this.data[i].ma24 && this.data[i-1]
+                    && this.data[i-1].ma8 > this.data[i-1].ma24;
+
+      if( upCondition ) {
+        this.data[i].dir = 1;
+      } else if ( downCondition ) {
+	this.data[i].dir = -1;
+      }
+
+   }
+
+ }
+
 }
 /*
 var mayo2016 = new Study(año,mes);
 mayo2016.order();
-var data = mayo2016.DATA("1");
-printjson(data);
+mayo2016.DATA("1");
+mayo2016.SMA(8);
+printjson(mayo2016.data);
 */
+
+/*
+db.EURUSD.find({
+ $or:[ 
+  { year:2016, month:5, day:30, hour:{ $gte:12 } },
+  { year:2016, month:5, day:31, hour:{ $lte:8 } }
+ ]
+}).sort({
+ year:1,
+ month:1,
+ day:1,
+ hour:1,
+ minutes:1,
+ seconds:1,
+ ms:1
+});
+*/
+
