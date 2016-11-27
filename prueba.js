@@ -19,14 +19,14 @@ var array = [];
   var secs = 59;
   var mins = 59;
   
-  var a = db.EURUSD.find({ year:y, month:m, day:d, hour:hrs, minutes:mins, seconds:secs }).sort({ ms:-1 }).limit(1).toArray()[0];
+  var a = db.EURUSD.find({ year:y, month:m, day:d, hour:hrs, minutes:mins, seconds:secs },{_id:0}).sort({ ms:-1 }).limit(1).toArray()[0];
     
   while(a == undefined && mins > 0) {
    secs--;
   if( secs < 0 ) { secs = 59; mins-- };
   if( mins < 58 ) break;  // <---- que tan rápido cortar el proceso..
  
-   a = db.EURUSD.find({ year:y, month:m, day:d, hour:hrs, minutes:mins, seconds:secs }).sort({ ms:-1 }).limit(1).toArray()[0];
+   a = db.EURUSD.find({ year:y, month:m, day:d, hour:hrs, minutes:mins, seconds:secs },{_id:0}).sort({ ms:-1 }).limit(1).toArray()[0];
  
  }
 
@@ -42,8 +42,14 @@ var array = [];
 //////////////////////////////////////////////////////////////////////////////
 
 Study.prototype.order = function() {
+ var orden = db.order.find({ año: this.year, mes: this.month }).count();
+
+ if( orden != 0 ) {
+  var info = db.order.find({ año: this.year, mes:this.month }).toArray()[0];
+  this.dias = info.dias;
+ } else {
  var array = [];
- print("Calibrando..");
+// print("Calibrando..");
 
  for(var i=1; i<32; i++) {
   var day = this.Filter(this.year,this.month,i);
@@ -91,7 +97,9 @@ var c = 0;
  this.dias = obj;
  this.semanas = b.length;
 
- print("¡Listo!");
+ db.order.insert({ año:this.year, mes:this.month, dias:this.dias, semanas:this.semanas});
+ }
+ //print("¡Listo!");
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -118,18 +126,18 @@ Study.prototype.DATA = function(k) {
 /////// ADD SIMPLE MOVING AVERAGES TO DATASET
 ////////////////////////////////////////////////////////////////////////
 
-Study.prototype.SMA = function(b,n) {
+Study.prototype.SMA = function(data,n) {
 
-  var c = b.length - 1;
+  var c = data.length - 1;
 
   while( c >= n ) {
     var arr = [];
     for(var i=0; i<n; i++) {
-      arr.push( b[c-i].bid );
+      arr.push( data[c-i].bid );
     }
 
     var ma = arr.reduce(function sum(a,b) { return a + b; }) / arr.length;
-    b[c]["ma" + n] = ma;
+    data[c]["ma" + n] = ma;
     c--;
   }
 
@@ -144,3 +152,9 @@ Study.prototype.SMA = function(b,n) {
 Study.prototype.CROSSOVER = function(a,b) {
  
 }
+/*
+var mayo2016 = new Study(año,mes);
+mayo2016.order();
+var data = mayo2016.DATA("1");
+printjson(data);
+*/
