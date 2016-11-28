@@ -153,7 +153,7 @@ Study.prototype.SMA = function(n) {
 Study.prototype.CROSSOVER = function(a,b) {
  var largeMA, not, goForward = false;
  if(a > b) { largeMA=a;not=b; } else { largeMA=b;not=a; }
- var check = this.data.filter(function(d) { return d["ma" + largeMA]; }).length;
+var check = this.data.filter(function(d) { return d["ma" + largeMA]; }).length;
  check != 0 ? doCross(largeMA,this.data):print("No such MA: " + largeMA);
 
  function doCross(largeMA,data) {
@@ -184,13 +184,13 @@ Study.prototype.CROSSOVER = function(a,b) {
  }
 
 }
-/*
+
 var mayo2016 = new Study(año,mes);
 mayo2016.order();
-mayo2016.DATA("1");
+mayo2016.DATA("2");
 mayo2016.SMA(8);
 printjson(mayo2016.data);
-*/
+
 
 /*
 db.EURUSD.find({
