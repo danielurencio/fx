@@ -37,6 +37,45 @@ var array = [];
  return array;
 };
 
+
+Study.prototype.FilterMins = function(y,m,d,n) {
+
+var array = [];
+
+ for(var hrs=0; hrs<24; hrs++) {
+
+//  var secs = 59;
+//  var mins = 59;
+  var c = 1;
+
+  for(var mins=-1; mins<=59; mins+=n) {
+   var secs = 59;
+
+   if(mins!=-1) {
+      var a = db.EURUSD.find({ year:y, month:m, day:d, hour:hrs, minutes:mins, seconds:secs },{_id:0}).sort({ ms:-1 }).limit(1).toArray()[0];
+       
+//      print( (n-2)*c );
+
+      while(a == undefined ) {//&& mins < (n-2)*c ) {
+       secs--;
+      if( secs < 0 ) { secs = 59; mins--;};
+      if( mins < (n-2)*c ) {  break; } // <---- que tan rápido cortar el proceso..
+ 
+       a = db.EURUSD.find({ year:y, month:m, day:d, hour:hrs, minutes:mins, seconds:secs },{_id:0}).sort({ ms:-1 }).limit(1).toArray()[0];
+
+     }
+
+     c++
+    if( a != undefined ) array.push(a);
+  }
+
+  }
+//print("Son las " + hrs + "--------------");
+ }
+
+ return array;
+};
+
 /////////////////////////////////////////////////////////////////////////////////
 //////// OBTENER DÍAS ÚTILES
 //////////////////////////////////////////////////////////////////////////////
@@ -107,15 +146,15 @@ var c = 0;
 ///////// GENERATE DATASET
 ///////////////////////////////////////////////////////////////////////////////
 
-Study.prototype.DATA = function(k) {
+Study.prototype.DATA = function(k,interval) {
  var b = [];
  var dias = this.dias[k].map(function(d) { return d.dia; });
 
   for(var i in dias) {
     if( i == 0 ) {
-      b = this.Filter(this.year,this.month,dias[i]);
+      b = this.FilterMins(this.year,this.month,dias[i],interval);
     } else {
-      b = b.concat(this.Filter(this.year,this.month,dias[i]));
+      b = b.concat( this.FilterMins(this.year,this.month,dias[i],interval) );
     }
   };
 
@@ -145,6 +184,28 @@ Study.prototype.SMA = function(n) {
 // return b;
 }
 
+Study.prototype.WMA = function(n) {
+
+  var c = this.data.length - 1;
+
+  while( c >= n ) {
+    var arr = [];
+    for(var i=0; i<n; i++) {
+      arr.push({ val:this.data[c-i].bid, weight:i+1 });
+    }
+
+    var triangularSum = arr.map(function(d) { return d.weight; }).reduce(function sum(a,b) { return a + b; });
+
+//    var ma = arr.reduce(function sum(a,b) { return a + b; }) / arr.length;
+    arr.forEach(function(d) { d.wVal = d.val * ( d.weight / triangularSum ); });
+
+    var wma = arr.map(function(d) { return d.wVal; }).reduce(function sum(a,b) { return a + b; });
+
+    this.data[c]["wma" + n] = wma;
+    c--;
+  }
+
+}
 
 //////////////////////////////////////////////////////////////////////////////
 /////  MA CROSSOVER
@@ -185,12 +246,14 @@ var check = this.data.filter(function(d) { return d["ma" + largeMA]; }).length;
 
 }
 
+/*
 var mayo2016 = new Study(año,mes);
 mayo2016.order();
-mayo2016.DATA("2");
+mayo2016.DATA("1");
 mayo2016.SMA(8);
+mayo2016.WMA(8);
 printjson(mayo2016.data);
-
+*/
 
 /*
 db.EURUSD.find({
