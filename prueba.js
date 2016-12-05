@@ -212,15 +212,15 @@ Study.prototype.WMA = function(n) {
 ////////////////////////////////////////////////////////////////////////////
 
 Study.prototype.CROSSOVER = function(a,b) {
- var largeMA, not, goForward = false;
- if(a > b) { largeMA=a;not=b; } else { largeMA=b;not=a; }
+ var largeMA, smallMA, goForward = false;
+ if(a > b) { largeMA=a;smallMA=b; } else { largeMA=b;smallMA=a; }
 var check = this.data.filter(function(d) { return d["ma" + largeMA]; }).length;
  check != 0 ? doCross(largeMA,this.data):print("No such MA: " + largeMA);
 
  function doCross(largeMA,data) {
   var f = data.filter(function(d) { return d["ma" + largeMA]; });
-  var checkAgain = data.filter(function(d) { return d["ma" + not]; }).length;
-  checkAgain != 0 ? goForward=true : print("No such MA: " + not);
+  var checkAgain = data.filter(function(d) { return d["ma" + smallMA]; }).length;
+  checkAgain != 0 ? goForward=true : print("No such MA: " + smallMA);
  }
 
  if(goForward) {
@@ -228,11 +228,11 @@ var check = this.data.filter(function(d) { return d["ma" + largeMA]; }).length;
   this.data = this.data.filter(function(d) { return d["ma" + largeMA]; });
 
   for(var i in this.data) {
-   var upCondition = this.data[i].ma8 > this.data[i].ma24 && this.data[i-1]
-                  && this.data[i-1].ma8 < this.data[i-1].ma24;
+   var upCondition=this.data[i]["ma" + smallMA] > this.data[i]["ma" + largeMA] && this.data[i-1]
+                  && this.data[i-1]["ma" + smallMA] < this.data[i-1]["ma" + largeMA];
 
-   var downCondition = this.data[i].ma8 < this.data[i].ma24 && this.data[i-1]
-                    && this.data[i-1].ma8 > this.data[i-1].ma24;
+   var downCondition=this.data[i]["ma" + smallMA] < this.data[i]["ma"+ largeMA] && this.data[i-1]
+                    && this.data[i-1]["ma"+smallMA] > this.data[i-1]["ma"+largeMA];
 
       if( upCondition ) {
         this.data[i].dir = 1;
@@ -246,14 +246,44 @@ var check = this.data.filter(function(d) { return d["ma" + largeMA]; }).length;
 
 }
 
+
+Study.prototype.CrossAnalysis = function() {
+  var crosses = this.data.filter(function(d) { return d.dir; });
+  if( crosses.length == 0 ) return;
+
+//  print(crosses.length);
+
+  for(var i=1; i<crosses.length; i++) {
+   crosses[i].dir > 0 ? UP() : DOWN();
+  };
+
+  function UP() {
+    var result = crosses[i].ask - crosses[i-1].bid;
+    print( result, periods(crosses[i-1],crosses[i]) );
+  }
+
+  function DOWN() {
+    var result = crosses[i-1].ask - crosses[i].bid;
+    print( result, periods(crosses[i-1],crosses[i]) );
+  }
+
+  function periods(a,b) {
+    if(a.day != b.day ) var p = 24 - a.hour + b.hour;
+    else { var p = b.hour - a.hour; }
+    return p;
+  }
+
+};
 /*
 var mayo2016 = new Study(año,mes);
 mayo2016.order();
-mayo2016.DATA("1");
+mayo2016.DATA("1",15);
 mayo2016.SMA(8);
 mayo2016.WMA(8);
 printjson(mayo2016.data);
 */
+
+//load("prueba.js"); var mayo2016 = new Study(2016,5); mayo2016.order();mayo2016.DATA("1",60); mayo2016.SMA(8); mayo2016.SMA(24); mayo2016.CROSSOVER(8,24);
 
 /*
 db.EURUSD.find({
