@@ -4,3 +4,4 @@ http://alignedleft.com/tutorials/d3/making-a-scatterplot
 http://flowingdata.com/2014/10/15/linked-small-multiples/
 http://vallandingham.me/scroller.html
 http://www.fxdd.com/us/en/forex-resources/forex-trading-tools/metatrader-1-minute-data/
+http://mechanicalforex.com/2015/12/converting-mt4-binary-history-files-hst-to-csv-using-a-python-script.html#comments
