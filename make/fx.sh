@@ -43,9 +43,39 @@ data() {
 
  MONTH3=$(echo $MONTH2 | tr A-Z a-z);
 
- curl "http://www.truefx.com/dev/data/${YEAR}/${MONTH2}-${YEAR}/${PARITY}-${YEAR}-${MONTH1}.zip" -H "Referer: http://www.truefx.com/?page=download&description=${MONTH3}${YEAR}&dir=${YEAR}/${MONTH2}-${YEAR}" > ${YEAR}_${MONTH1}.zip
- 
-# echo "http://www.truefx.com/dev/data/${YEAR}/${MONTH2}-${YEAR}/${PARITY}-${YEAR}-${MONTH1}.zip" -H "Referer: http://www.truefx.com/?page=download&description=${MONTH3}${YEAR}&dir=${YEAR}/${MONTH2}-${YEAR}";
+ if [[ ${YEAR} > 2016 && ${MONTH1} > 03 ]]; then
+    curl "http://truefx.com/dev/data/${YEAR}/${YEAR}-${MONTH1}/${PARITY}-${YEAR}-${MONTH1}.zip" -H "Referer: http://truefx.com/?page=download&description=${MONTH3}${YEAR}&dir=${YEAR}/${YEAR}-${MONTH1}" > ${YEAR}-${MONTH1}.zip
+ else
+curl "http://www.truefx.com/dev/data/${YEAR}/${MONTH2}-${YEAR}/${PARITY}-${YEAR}-${MONTH1}.zip" -H "Referer: http://www.truefx.com/?page=download&description=${MONTH3}${YEAR}&dir=${YEAR}/${MONTH2}-${YEAR}" > ${YEAR}_${MONTH1}.zip
+ fi
 
+}
+
+TODO() {
+ for m in 5 6 7 8 9 10 11 12; do
+  data 2009 $m EURUSD
+  unzip *.zip; rm *.zip
+  data *.csv
+  mongoimport -d fx -c EURUSD --headerline --type=csv *.csv
+  rm *.csv
+ done
+
+ for y in 2010 2011 2012 2013 2014 2015 2016; do
+  for m in 1 2 3 4 5 6 7 8 9 10 11 12; do
+   data $y $m EURUSD
+   unzip *.zip; rm *.zip
+   data *.csv
+   mongoimport -d fx -c EURUSD --headerline --type=csv *.csv
+   rm *.csv  
+  done
+ done
+
+ for m in 1 2 3 4 5 6; do
+  data 2017 $m EURUSD
+  unzip *.zip; rm *.zip
+  data *.csv
+  mongoimport -d fx -c EURUSD --headerline --type=csv *.csv
+  rm *.csv
+ done
 
 }
