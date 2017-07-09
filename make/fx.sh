@@ -55,7 +55,7 @@ TODO() {
  for m in 5 6 7 8 9 10 11 12; do
   data 2009 $m EURUSD
   unzip *.zip; rm *.zip
-  data *.csv
+  ordenar *.csv
   mongoimport -d fx -c EURUSD --headerline --type=csv *.csv
   rm *.csv
  done
@@ -64,7 +64,7 @@ TODO() {
   for m in 1 2 3 4 5 6 7 8 9 10 11 12; do
    data $y $m EURUSD
    unzip *.zip; rm *.zip
-   data *.csv
+   ordenar *.csv
    mongoimport -d fx -c EURUSD --headerline --type=csv *.csv
    rm *.csv  
   done
@@ -73,7 +73,7 @@ TODO() {
  for m in 1 2 3 4 5 6; do
   data 2017 $m EURUSD
   unzip *.zip; rm *.zip
-  data *.csv
+  ordenar *.csv
   mongoimport -d fx -c EURUSD --headerline --type=csv *.csv
   rm *.csv
  done
