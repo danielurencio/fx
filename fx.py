@@ -3,22 +3,21 @@ import numpy as np
 import pandas as pd
 
 #col = pymongo.MongoClient("mongodb://localhost:27017").fx.EURUSD
-obj = { 'db': 'fx', 'collection': 'EURUSD', 'month': 5, 'connection': 'mongodb://localhost:27017', 'year': 2009, 'day': 1 }
+obj = { 'db': 'fx', 'collection': 'EURUSD', 'month': 5, 'connection': 'mongodb://localhost:27017', 'year': 2009 }
 
 class FX(object):
     def __init__(self,obj):
-	self.connection = obj["connection"]
+	self.conn = obj["connection"]
 	self.db = obj["db"]
-	self.collection = obj["collection"]
-	self.cursor = pymongo.MongoClient(self.connection)[self.db][self.collection]
+	self.col = obj["collection"]
+	self.cursor = pymongo.MongoClient(self.conn)[self.db][self.col]
 	self.year = obj["year"]
 	self.month = obj["month"]
-	self.day = obj["day"]
 	self.df = []
 
     def Buscar(self):
 	projection = { "_id":0, "currency":0 }
-	query = { "year":self.year, "month":self.month, "day":self.day }
+	query = { "year":self.year, "month":self.month }
 	return self.cursor.find(query,projection)
 
     def DF(self):
@@ -29,3 +28,11 @@ class FX(object):
 	    self.df.append(d.values())
 	self.df = np.array(self.df)
 	self.df = pd.DataFrame(self.df, columns=columns)
+
+    def Bars(self):
+	self.DF()
+	groupFilter = ["day","hour","minutes"]
+	self.closeP = self.df.groupby(groupFilter)["ms"].max().reset_index()
+#	self.openP = self.df.groupby(groupFilter)["ms"].min()
+#        self.highP = self.df.groupby(groupFilter)["ask"].max() 
+#        self.lowP = self.df.groupby(groupFilter)["ask"].min() 
