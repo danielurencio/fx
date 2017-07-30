@@ -10,14 +10,13 @@ class FX(object):
 	self.db = obj["db"]
 	self.col = obj["collection"]
 	self.cursor = pymongo.MongoClient(self.conn)[self.db][self.col]
-	self.year = obj["year"]
-	self.month = obj["month"]
+	self.query = obj["query"]
 	self.df = []
 
     def Buscar(self):
 	projection = { "_id":0, "currency":0 }
-	query = { "year":self.year, "month":self.month }
-	return self.cursor.find(query,projection)
+#	self.query = { "year":self.year, "month":self.month }
+	return self.cursor.find(self.query,projection)
 
     def DF(self):
 	cursor = self.Buscar()
@@ -61,16 +60,18 @@ class FX(object):
 	self.Bars_1()
         file_n = self.col + '_' + str(self.year) + '_' + str(self.month)
         self.file_1m = file_n + '_1m.csv'
-	self.bars_1.to_csv(file_n + '_1m.csv',index=False);
+	self.bars_1.to_csv(self.file_1m, index=False);
 
 
 if(__name__ == "__main__"):
     obj = {
       'db': 'fx',
       'collection': sys.argv[1],
-      'month': int(sys.argv[3]),
       'connection': 'mongodb://localhost:27017',
-      'year': int(sys.argv[2])
+      'query': {
+	'year':int(sys.argv[2]),
+	'month':int(sys.argv[3])
+      }
     }
     parity = FX(obj)
     parity.Bars_1_toCSV()
