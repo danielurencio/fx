@@ -1,9 +1,8 @@
+import sys
 import pymongo
 import numpy as np
 import pandas as pd
 
-#col = pymongo.MongoClient("mongodb://localhost:27017").fx.EURUSD
-obj = { 'db': 'fx', 'collection': 'EURUSD', 'month': 5, 'connection': 'mongodb://localhost:27017', 'year': 2009 }
 
 class FX(object):
     def __init__(self,obj):
@@ -42,8 +41,8 @@ class FX(object):
 	C_close = pd.merge(B_close,A_close)
         C_open = pd.merge(B_open,A_open)
         dropCols = ['seconds','ms']
-	closeP = pd.merge(C_close,a.df).drop(dropCols,1)
-	openP = pd.merge(C_open,a.df).drop(dropCols,1)
+	closeP = pd.merge(C_close,self.df).drop(dropCols,1)
+	openP = pd.merge(C_open,self.df).drop(dropCols,1)
 	closeP.rename(columns={'bid':'close_bid','ask':'close_ask'},inplace=True)
 	openP.rename(columns={'bid':'open_bid','ask':'open_ask'},inplace=True)
         ask = self.df.groupby(groupFilter3)["ask"]
@@ -57,3 +56,22 @@ class FX(object):
 	high_low = pd.merge(high,low);
 	open_close = pd.merge(openP,closeP);
 	self.bars_1 = pd.merge(open_close,high_low)
+
+    def Bars_1_toCSV(self):
+	self.Bars_1()
+        file_n = self.col + '_' + str(self.year) + '_' + str(self.month)
+        self.file_1m = file_n + '_1m.csv'
+	self.bars_1.to_csv(file_n + '_1m.csv',index=False);
+
+
+if(__name__ == "__main__"):
+    obj = {
+      'db': 'fx',
+      'collection': sys.argv[1],
+      'month': int(sys.argv[3]),
+      'connection': 'mongodb://localhost:27017',
+      'year': int(sys.argv[2])
+    }
+    parity = FX(obj)
+    parity.Bars_1_toCSV()
+    print(parity.file_1m)
