@@ -29,10 +29,31 @@ class FX(object):
 	self.df = np.array(self.df)
 	self.df = pd.DataFrame(self.df, columns=columns)
 
-    def Bars(self):
+    def Bars_1(self):
 	self.DF()
-	groupFilter = ["day","hour","minutes"]
-	self.closeP = self.df.groupby(groupFilter)["ms"].max().reset_index()
-#	self.openP = self.df.groupby(groupFilter)["ms"].min()
-#        self.highP = self.df.groupby(groupFilter)["ask"].max() 
-#        self.lowP = self.df.groupby(groupFilter)["ask"].min() 
+	groupFilter1 = ["day","hour","minutes","seconds"]
+        groupFilter2 = ["day","hour","minutes"]
+        groupFilter3 = ["year","month"] + groupFilter2
+        filterByms = self.df.groupby(groupFilter1)["ms"]
+	A_close = filterByms.max().reset_index()
+	A_open = filterByms.min().reset_index()
+	B_close = A_close.groupby(groupFilter2)['seconds'].max().reset_index()
+	B_open = A_open.groupby(groupFilter2)['seconds'].min().reset_index()
+	C_close = pd.merge(B_close,A_close)
+        C_open = pd.merge(B_open,A_open)
+        dropCols = ['seconds','ms']
+	closeP = pd.merge(C_close,a.df).drop(dropCols,1)
+	openP = pd.merge(C_open,a.df).drop(dropCols,1)
+	closeP.rename(columns={'bid':'close_bid','ask':'close_ask'},inplace=True)
+	openP.rename(columns={'bid':'open_bid','ask':'open_ask'},inplace=True)
+        ask = self.df.groupby(groupFilter3)["ask"]
+        bid = self.df.groupby(groupFilter3)["bid"]
+        high_ask = ask.max().reset_index()
+	high_bid = bid.max().reset_index()
+        low_ask = ask.min().reset_index()
+	low_bid = bid.min().reset_index()
+	high = pd.merge(high_ask,high_bid).rename(columns={'bid':'high_bid','ask':'high_ask'})
+	low = pd.merge(low_ask,low_bid).rename(columns={'bid':'low_bid','ask':'low_ask'})
+	high_low = pd.merge(high,low);
+	open_close = pd.merge(openP,closeP);
+	self.bars_1 = pd.merge(open_close,high_low)
