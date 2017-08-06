@@ -94,10 +94,8 @@ class FX(object):
 	    print s
 	ff = (self.df["minutes"]>=0) & (self.df["minutes"]<5)
 	first = self.df[ff].groupby(filtro)["minutes"].min().reset_index()
-#        arr.append(self.df[self.df["minutes"]<=5].groupby(filtro)["minutes"].max().reset_index())
-#	arr.append(self.df[(self.df["minutes"]>5) & (self.df["minutes"]<=10)].groupby(filtro)["minutes"].max().reset_index())
-#        return pd.merge(arr[0].append(arr[1]),self.df)
-	return pd.merge(first.append(arr),self.df)
+	result = pd.merge(first.append(arr),self.df).sort_values(by=["month","day","hour","minutes"])
+	return result
 	
 
 
