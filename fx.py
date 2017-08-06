@@ -62,6 +62,44 @@ class FX(object):
         self.file_1m = file_n + '_1m.csv'
 	self.bars_1.to_csv(self.file_1m, index=False);
 
+    def DistributeQueriesBars_1(self):
+	dayQueries = [
+	  { 'year':self.query['year'], 'month':self.query['month'], 'day': { '$lte':15 } },
+	  { 'year':self.query['year'], 'month':self.query['month'], 'day': { '$gt':15 } },
+	]
+	for i,d in enumerate(dayQueries):
+	    self.query = dayQueries[i]
+	    print(self.query)
+	    self.df = []
+	    self.bars_1 = ''
+	    self.Bars_1()
+	    self.bars_1.to_csv("file_" + str(i) + ".csv", index=False)
+
+    def mm(self,period):
+	self.collection = "eurusd_1m"
+	arr = []
+	self.df = []
+	self.bars_1 = ''
+	self.DF()
+        filtro = ["month","day","hour"]
+	x = period
+	c = period
+	while(c<60):
+	    f = (self.df["minutes"]>=(c-x)) & (self.df["minutes"]<c)
+	    df = self.df[f].groupby(filtro)["minutes"].max().reset_index()
+#	    df["minutes"] = c
+	    arr.append(df)
+	    s = "(" + str(c-x) + "," + str(c) + ")"
+	    c += x
+	    print s
+	ff = (self.df["minutes"]>=0) & (self.df["minutes"]<5)
+	first = self.df[ff].groupby(filtro)["minutes"].min().reset_index()
+#        arr.append(self.df[self.df["minutes"]<=5].groupby(filtro)["minutes"].max().reset_index())
+#	arr.append(self.df[(self.df["minutes"]>5) & (self.df["minutes"]<=10)].groupby(filtro)["minutes"].max().reset_index())
+#        return pd.merge(arr[0].append(arr[1]),self.df)
+	return pd.merge(first.append(arr),self.df)
+	
+
 
 if(__name__ == "__main__"):
     obj = {
@@ -73,6 +111,6 @@ if(__name__ == "__main__"):
 	'month':int(sys.argv[3])
       }
     }
+
     parity = FX(obj)
-    parity.Bars_1_toCSV()
-    print(parity.file_1m)
+    parity.DistributeQueriesBars_1()
