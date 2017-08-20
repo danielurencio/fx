@@ -11,13 +11,20 @@ class NN(object):
     dSize = self.data.shape[0]
     dataX, dataY = [], []
     for i in range(dSize-(x+y)+1):
+      o = self.data.ask_open.values
+      o = o.reshape(o.shape[0],1)
       c = self.data.ask_close.values
       c = c.reshape(c.shape[0],1)
       l = self.data.ask_low.values
       l = l.reshape(l.shape[0],1)
       h = self.data.ask_high.values
       h = h.reshape(h.shape[0],1)
-      a = c[i:(i+x),0]
+      o_ = o[i:(i+x),0].tolist()
+      c_ = c[i:(i+x),0].tolist()
+      l_ = l[i:(i+x),0].tolist()
+      h_ = h[i:(i+x),0].tolist()
+      a = o[i:(i+x),0]
+      a_ = o_ + c_ + l_ + h_
       lows = l[(i+x):(i+x)+y,0]
       highs = h[(i+x):(i+x)+y,0]
       y_ = [ np.min(lows), np.max(highs) ]
@@ -32,7 +39,7 @@ class NN(object):
       if( neither ):
 	y_ = [0,1,0]
       dataY.append(y_)
-      dataX.append(a)
+      dataX.append(a_)
     return np.array(dataX), np.array(dataY)
 
 
