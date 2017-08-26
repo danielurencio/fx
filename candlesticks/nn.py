@@ -4,8 +4,6 @@ import numpy as np
 class NN(object):
   def __init__(self,file_):
     self.data = pd.read_csv(file_)
-    self.c = self.data.ask_close.values
-    self.c = self.c.reshape(self.c.shape[0],1)
 
   def create_dataset(self,x,y,t):
     dSize = self.data.shape[0]
@@ -23,14 +21,14 @@ class NN(object):
       c_ = c[i:(i+x),0].tolist()
       l_ = l[i:(i+x),0].tolist()
       h_ = h[i:(i+x),0].tolist()
-      a = o[i:(i+x),0]
+      last = c[i:(i+x),0]
       a_ = o_ + c_ + l_ + h_
       lows = l[(i+x):(i+x)+y,0]
       highs = h[(i+x):(i+x)+y,0]
       y_ = [ np.min(lows), np.max(highs) ]
-      upCond = ( y_[1] - a[a.shape[0]-1] ) >= t
-      downCond = ( a[a.shape[0]-1] - y_[0] ) >= t
-      neither = (y_[1] - a[a.shape[0]-1] ) < t and ( a[a.shape[0]-1] - y_[0] ) < t
+      upCond = ( y_[1] - last[last.shape[0]-1] ) >= t
+      downCond = ( last[last.shape[0]-1] - y_[0] ) >= t
+      neither = (y_[1] - last[last.shape[0]-1] ) < t and ( last[last.shape[0]-1] - y_[0] ) < t
 #      neither = not upCond and not downCond
       if( upCond ):
 	y_ = [0,0,1]
