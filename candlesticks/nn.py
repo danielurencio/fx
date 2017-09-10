@@ -1,13 +1,13 @@
 import pandas as pd
 import numpy as np
 from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import Dropout
+from keras.layers import Dense,Dropout
 from keras import initializers
 from scipy import stats
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, precision_score, recall_score
+import matplotlib.pyplot as plt
 
 class NN(object):
   def __init__(self,file_):
@@ -30,7 +30,24 @@ class NN(object):
     str2 = "ma_2_" + price
     self.data[str1] = nn.data[price].rolling(c[0]*4).mean()
     self.data[str2] = nn.data[price].rolling(c[1]*4).mean()
-    self.data.dropna(inplace=True)
+    #self.data.dropna(inplace=True)
+
+  def BB_penetration(self,price,length):
+    str1 = "BB_" + price
+    str2 = "ma_" + price
+    self.data[str1] = nn.data[price].rolling(length*4).std()
+    self.data[str2] = nn.data[price].rolling(length*4).mean()
+    self.data["up_BB_" + price] = self.data[str2] + 2*self.data[str1]
+    self.data["dn_BB_" + price] = self.data[str2] - 2*self.data[str1]
+    self.data["up_pn_" + price + "_" + str(length)] = self.data['ask_high'] - self.data["up_BB_"+price]
+    self.data["dn_pn_" + price + "_" + str(length)] = self.data['ask_low'] - self.data["dn_BB_"+price]
+
+  def proto_bollinger(self,price,c):
+    str1 = "pbol_1_" + price
+    str2 = "pbol_2_" + price
+    self.data[str1] = nn.data[price].rolling(c[0]*4).std()
+    self.data[str2] = nn.data[price].rolling(c[1]*4).std()
+    #self.data.dropna(inplace=True)
 
   def shapedObs(self,col,i,x):
     X = self.data[col].values
@@ -43,6 +60,13 @@ class NN(object):
     self.crossover('ask_open',(3,12))
     self.crossover('ask_low',(3,12))
     self.crossover('ask_high',(3,12))
+    self.proto_bollinger('ask_close',(3,12))
+    self.proto_bollinger('ask_open',(3,12))
+    self.proto_bollinger('ask_high',(3,12))
+    self.proto_bollinger('ask_low',(3,12))
+    self.BB_penetration('ask_close',12)
+    self.BB_penetration('ask_close',3)
+    self.data.dropna(inplace=True)
     dSize = self.data.shape[0]
     dataX, dataY = [], []
     for i in range(dSize-(x+y)+1):
@@ -51,6 +75,10 @@ class NN(object):
       dates = dates[i:(i+x),0]
       dates = pd.to_datetime(dates[dates.shape[0]-1])
       dates = [dates.day,dates.hour,dates.minute]
+      up_pn_c_12 = self.shapedObs('up_pn_ask_close_12',i,x).tolist()
+      dn_pn_c_12 = self.shapedObs('dn_pn_ask_close_12',i,x).tolist()
+      up_pn_c_3 = self.shapedObs('up_pn_ask_close_3',i,x).tolist()
+      dn_pn_c_3 = self.shapedObs('dn_pn_ask_close_3',i,x).tolist()
       ma1_c = self.shapedObs('ma_1_ask_close',i,x).tolist()
       ma2_c = self.shapedObs('ma_2_ask_close',i,x).tolist()
       ma1_o = self.shapedObs('ma_1_ask_open',i,x).tolist()
@@ -59,6 +87,14 @@ class NN(object):
       ma2_l = self.shapedObs('ma_2_ask_low',i,x).tolist()
       ma1_h = self.shapedObs('ma_1_ask_high',i,x).tolist()
       ma2_h = self.shapedObs('ma_2_ask_high',i,x).tolist()
+      pbol1_c = self.shapedObs('pbol_1_ask_close',i,x).tolist()
+      pbol2_c = self.shapedObs('pbol_2_ask_close',i,x).tolist()
+      pbol1_o = self.shapedObs('pbol_1_ask_open',i,x).tolist()
+      pbol2_o = self.shapedObs('pbol_2_ask_open',i,x).tolist()
+      pbol1_h = self.shapedObs('pbol_1_ask_high',i,x).tolist()
+      pbol2_h = self.shapedObs('pbol_2_ask_high',i,x).tolist()
+      pbol1_l = self.shapedObs('pbol_1_ask_low',i,x).tolist()
+      pbol2_l = self.shapedObs('pbol_2_ask_low',i,x).tolist()
       l = self.data.ask_low.values
       l = l.reshape(l.shape[0],1)
       h = self.data.ask_high.values
@@ -69,7 +105,7 @@ class NN(object):
       l_ = l[i:(i+x),0].tolist()
       h_ = h[i:(i+x),0].tolist()
       last = c
-      a_ = dates + self.regParams(l_) + self.regParams(h_) + self.regParams(c_) + self.regParams(o_) + self.regParams(ma1_c) + self.regParams(ma2_c) + self.regParams(ma1_o) + self.regParams(ma2_o) + self.regParams(ma1_l) + self.regParams(ma2_l) + self.regParams(ma1_h) + self.regParams(ma2_h)
+      a_ = dates + self.regParams(l_) + self.regParams(h_) + self.regParams(c_) + self.regParams(o_) + self.regParams(ma1_c) + self.regParams(ma2_c) + self.regParams(ma1_o) + self.regParams(ma2_o) + self.regParams(ma1_l) + self.regParams(ma2_l) + self.regParams(ma1_h) + self.regParams(ma2_h)+ self.regParams(up_pn_c_12) + self.regParams(dn_pn_c_12) + self.regParams(up_pn_c_3) + self.regParams(dn_pn_c_3) + self.regParams(pbol1_c) + self.regParams(pbol2_c) + self.regParams(pbol1_o) + self.regParams(pbol2_o) + self.regParams(pbol1_h) + self.regParams(pbol2_h) + self.regParams(pbol1_l) + self.regParams(pbol2_l)
       lows = l[(i+x):(i+x)+y,0]
       highs = h[(i+x):(i+x)+y,0]
       y_ = [ np.min(lows), np.max(highs) ]
@@ -104,8 +140,16 @@ class NN(object):
     self.model.compile(loss='categorical_crossentropy', optimizer='RMSprop', metrics=['accuracy'])
 
   def fitness(self):
-    p = np.around(nn.model.predict(nn.X_test)).astype(np.int)
+    p = np.around(nn.model.predict(self.X_test)).astype(np.int)
     return f1_score(self.Y_test,p,average=None)
+
+  def precision(self):
+    p = np.around(nn.model.predict(self.X_test)).astype(np.int)
+    return precision_score(self.Y_test,p,average=None)
+
+  def recall(self):
+    p = np.around(nn.model.predict(self.X_test)).astype(np.int)
+    return recall_score(self.Y_test,p,average=None)
 
 
 if(__name__ == "__main__"):
@@ -114,5 +158,5 @@ if(__name__ == "__main__"):
   nn.scale()
   nn.network_class()
   nn.train_test()
-#  nn.model.fit(nn.X_train, nn.Y_train, epochs=300, batch_size=400,shuffle=True)
+#  nn.model.fit(nn.X_train, nn.Y_train, epochs=800, batch_size=5000,shuffle=True)
 #  nn.fitness()

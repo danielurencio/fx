@@ -4,4 +4,5 @@ public/
 views/
 *.pdf
 make/*.zip
-make/*.csv
+*.csv
+*.pyc
