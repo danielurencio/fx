@@ -135,7 +135,13 @@ class NN(object):
     self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
     self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
     self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
+    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
+    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
+    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
+    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
+
 #    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
+
     self.model.add(Dense(3,activation='softmax',kernel_initializer='glorot_normal'))
     self.model.compile(loss='categorical_crossentropy', optimizer='RMSprop', metrics=['accuracy'])
 
@@ -158,5 +164,5 @@ if(__name__ == "__main__"):
   nn.scale()
   nn.network_class()
   nn.train_test()
-#  nn.model.fit(nn.X_train, nn.Y_train, epochs=800, batch_size=5000,shuffle=True)
+#  nn.model.fit(nn.X_train, nn.Y_train, epochs=1000, batch_size=5000,shuffle=True)
 #  nn.fitness()
