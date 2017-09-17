@@ -10,14 +10,17 @@ from sklearn.metrics import f1_score, precision_score, recall_score
 import matplotlib.pyplot as plt
 
 class NN(object):
-  def __init__(self,file_):
+  def __init__(self):
+    self.data = ""
+
+  def csv(self,file_):
     self.data = pd.read_csv(file_)
     self.data.Date_Time = pd.to_datetime(self.data.Date_Time)
     self.data.set_index("Date_Time",inplace=True)
 
   def scale(self):
-    std_scale = preprocessing.StandardScaler().fit(self.X)
-    self.X = std_scale.transform(self.X)
+    self.std_scale = preprocessing.StandardScaler().fit(self.X)
+    self.X = self.std_scale.transform(self.X)
 
   def regParams(self,S):
     x_r = [ index for index,dd in enumerate(S) ]
@@ -28,15 +31,15 @@ class NN(object):
   def crossover(self,price,c):
     str1 = "ma_1_" + price
     str2 = "ma_2_" + price
-    self.data[str1] = nn.data[price].rolling(c[0]*4).mean()
-    self.data[str2] = nn.data[price].rolling(c[1]*4).mean()
+    self.data[str1] = self.data[price].rolling(c[0]*4).mean()
+    self.data[str2] = self.data[price].rolling(c[1]*4).mean()
     #self.data.dropna(inplace=True)
 
   def BB_penetration(self,price,length):
     str1 = "BB_" + price
     str2 = "ma_" + price
-    self.data[str1] = nn.data[price].rolling(length*4).std()
-    self.data[str2] = nn.data[price].rolling(length*4).mean()
+    self.data[str1] = self.data[price].rolling(length*4).std()
+    self.data[str2] = self.data[price].rolling(length*4).mean()
     self.data["up_BB_" + price] = self.data[str2] + 2*self.data[str1]
     self.data["dn_BB_" + price] = self.data[str2] - 2*self.data[str1]
     self.data["up_pn_" + price + "_" + str(length)] = self.data['ask_high'] - self.data["up_BB_"+price]
@@ -45,8 +48,8 @@ class NN(object):
   def proto_bollinger(self,price,c):
     str1 = "pbol_1_" + price
     str2 = "pbol_2_" + price
-    self.data[str1] = nn.data[price].rolling(c[0]*4).std()
-    self.data[str2] = nn.data[price].rolling(c[1]*4).std()
+    self.data[str1] = self.data[price].rolling(c[0]*4).std()
+    self.data[str2] = self.data[price].rolling(c[1]*4).std()
     #self.data.dropna(inplace=True)
 
   def shapedObs(self,col,i,x):
@@ -126,8 +129,8 @@ class NN(object):
     self.X = np.array(dataX)
     self.Y = np.array(dataY)
 
-  def train_test(self):
-    self.X_train, self.X_test, self.Y_train, self.Y_test = train_test_split(self.X,self.Y,test_size=0.3)
+  def train_test(self,split_size):
+    self.X_train, self.X_test, self.Y_train, self.Y_test = train_test_split(self.X,self.Y,test_size=split_size)
 
   def network_class(self):
     self.model = Sequential()
@@ -146,23 +149,24 @@ class NN(object):
     self.model.compile(loss='categorical_crossentropy', optimizer='RMSprop', metrics=['accuracy'])
 
   def fitness(self):
-    p = np.around(nn.model.predict(self.X_test)).astype(np.int)
+    p = np.around(self.model.predict(self.X_test)).astype(np.int)
     return f1_score(self.Y_test,p,average=None)
 
   def precision(self):
-    p = np.around(nn.model.predict(self.X_test)).astype(np.int)
+    p = np.around(self.model.predict(self.X_test)).astype(np.int)
     return precision_score(self.Y_test,p,average=None)
 
   def recall(self):
-    p = np.around(nn.model.predict(self.X_test)).astype(np.int)
+    p = np.around(self.model.predict(self.X_test)).astype(np.int)
     return recall_score(self.Y_test,p,average=None)
 
 
 if(__name__ == "__main__"):
-  nn = NN("EURUSD15Min.csv")
-  nn.create_dataset(12*4,3*4,0.0015)
+  nn = NN()
+  nn.csv("EURUSD15Min.csv")
+  nn.create_dataset(12*4,3*4,0.002)
   nn.scale()
   nn.network_class()
-  nn.train_test()
+  nn.train_test(0.10)
 #  nn.model.fit(nn.X_train, nn.Y_train, epochs=1000, batch_size=5000,shuffle=True)
 #  nn.fitness()
