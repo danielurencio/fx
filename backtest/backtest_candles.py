@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import oandapy as opy
 import datetime
+import dateutil
 import sys
 
 def get_candles(dates,token):
@@ -21,6 +22,34 @@ def last_n(date,n):
   end = datetime.datetime(date.year,date.month,date.day,date.hour,ix)
   start = end -datetime.timedelta(minutes=15*n)
   return (start.isoformat(),end.isoformat())
+
+
+def get_LastCandles(date,n,token):
+  dates = last_n(date,n)
+  data = get_candles(dates,token)
+  missing = n - len(data)
+  first_date = dateutil.parser.parse(data[0]["time"])
+  g_t = lambda x:x["time"]
+  past_dates = last_n(first_date,missing)
+  condition = True
+  while(condition): 
+      try:
+        past_data = get_candles(past_dates,token)
+      except:
+        pass
+      else:
+        if(len(past_data) == missing):
+          data = past_data + data
+          return data
+          condition = False
+      finally:
+        date0 = dateutil.parser.parse(past_dates[0])
+        date0 = (date0 - datetime.timedelta(minutes=15)).isoformat()
+        date1 = dateutil.parser.parse(past_dates[1])
+        date1 = (date1 - datetime.timedelta(minutes=15)).isoformat()
+        past_dates = (date0,date1)
+        print(len(data),past_dates)
+
 
 def create_df(data):
   dic = {
