@@ -55,3 +55,11 @@ def graph_(a,values_,time_,trades_):
   ax2.set_ylabel("Balance")
   ax2.plot(time,balance)
   plt.show()
+
+def fitnessVSbalance(arr):
+  balances = map(lambda x:x["backtest"][len(x["backtest"]) - 1]["balance"],arr)
+  balances = np.array(balances)
+  fitness = map(lambda x:np.mean(x["fitness"]),arr)
+  fitness = np.array(fitness)
+  plt.scatter(fitness,balances)
+  plt.show()

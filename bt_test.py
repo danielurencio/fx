@@ -13,7 +13,7 @@ dates_bt = ('2017-02-27','2017-03-04')
 data_modelo = get_candles(dates_modelo,token)
 df_modelo = create_df(data_modelo)
 modelo = NN()
-chromosome = [12*4,4*4,0.003,0.1,2000,5000]
+chromosome = [12*4,3*4,0.002,0.1,1000,5000]
 modelo.create_model(df_modelo,chromosome)
 print modelo.fitness()
 print modelo.recall()
