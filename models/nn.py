@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import dateutil
 from keras.models import Sequential
 from keras.layers import Dense,Dropout
 from keras import initializers
@@ -106,8 +107,9 @@ class NN(object):
     dates = self.data.index.values
     dates = dates.reshape(dates.shape[0],1)
     dates = dates[i:(i+x),0]
+    weekday = dateutil.parser.parse(str(dates[dates.shape[0]-1])).weekday()
     dates = pd.to_datetime(dates[dates.shape[0]-1])
-    dates = [dates.day,dates.hour,dates.minute]
+    dates = [dates.day,dates.hour,dates.minute,weekday]
     up_pn_c_12 = self.shapedObs('up_pn_ask_close_12',i,x).tolist()
     dn_pn_c_12 = self.shapedObs('dn_pn_ask_close_12',i,x).tolist()
     up_pn_c_3 = self.shapedObs('up_pn_ask_close_3',i,x).tolist()
