@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import dateutil
+from keras.callbacks import Callback
 from keras.models import Sequential
 from keras.layers import Dense,Dropout
 from keras import initializers
@@ -10,6 +11,27 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score, precision_score, recall_score
 import matplotlib.pyplot as plt
 from datetime import datetime
+
+
+class EarlyStoppingByLossVal(Callback):
+    def __init__(self, monitor='val_loss', value=0.46, verbose=0):
+        super(Callback, self).__init__()
+        self.monitor = monitor
+        self.value = value
+        self.verbose = verbose
+
+    def on_epoch_end(self, epoch, logs={}):
+        current = logs.get(self.monitor)
+        if current is None:
+            warnings.warn("Early stopping requires %s available!" % self.monitor, RuntimeWarning)
+
+        if current < self.value:
+            if self.verbose > 0:
+                print("Epoch %05d: early stopping THR" % epoch)
+            self.model.stop_training = True
+
+
+
 
 class NN(object):
   def __init__(self):
@@ -153,18 +175,18 @@ class NN(object):
 
   def network_class(self):
     self.model = Sequential()
-    self.model.add(Dense(90, input_dim = self.X.shape[1], activation='relu',kernel_initializer='glorot_normal'))
-    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
-    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
-    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
-    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
-    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
-    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
-    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
+    self.model.add(Dense(90, input_dim = self.X.shape[1], activation='relu',kernel_initializer='glorot_uniform'))
+    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
+    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
+    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
+    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
+    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
+    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
+    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
 
-#    self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_normal'))
+   # self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
 
-    self.model.add(Dense(3,activation='softmax',kernel_initializer='glorot_normal'))
+    self.model.add(Dense(3,activation='softmax',kernel_initializer='glorot_uniform'))
     self.model.compile(loss='categorical_crossentropy', optimizer='RMSprop', metrics=['accuracy'])
 
   def create_model(self,data,chromosome):
@@ -180,7 +202,7 @@ class NN(object):
     self.scale()
     self.network_class()
     self.train_test(self.test_split)
-    self.model.fit(self.X_train,self.Y_train,epochs=self.epochs,batch_size=self.batch_size,shuffle=True,verbose=0)
+    self.history = self.model.fit(self.X_train,self.Y_train,epochs=self.epochs,batch_size=self.batch_size,shuffle=True,verbose=0,validation_data=(self.X_test,self.Y_test),callbacks=[EarlyStoppingByLossVal(monitor='val_loss', value=0.19, verbose=1)])
     t1 = datetime.now() - t0
     print "Model trained in:",str(t1)
 
