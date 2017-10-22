@@ -3,7 +3,7 @@ import numpy as np
 import dateutil
 from keras.callbacks import Callback
 from keras.models import Sequential
-from keras.layers import Dense,Dropout
+from keras.layers import Dense,Dropout,LSTM
 from keras import initializers
 from scipy import stats
 from sklearn import preprocessing
@@ -36,6 +36,15 @@ class EarlyStoppingByLossVal(Callback):
 class NN(object):
   def __init__(self):
     self.data = ""
+
+  def levels_(self,data,n):
+    levels = []
+    chunks = np.array_split(np.array(data),n)
+    for i in chunks:
+      levels.append(np.min(i))
+      levels.append(np.max(i))
+      levels.append(np.mean(i))
+    return levels
 
   def csv(self,file_):
     self.data = pd.read_csv(file_)
@@ -123,6 +132,7 @@ class NN(object):
       dataY.append(y_)
       dataX.append(a_)
     self.X = np.array(dataX)
+#    self.X = np.reshape(self.X,(self.X.shape[0],1,self.X.shape[1]))
     self.Y = np.array(dataY)
 
   def one_observation(self,i,x):
@@ -162,7 +172,8 @@ class NN(object):
     l_ = l[i:(i+x),0].tolist()
     h_ = h[i:(i+x),0].tolist()
     last = c
-    a_ = dates + self.regParams(l_) + self.regParams(h_) + self.regParams(c_) + self.regParams(o_) + self.regParams(ma1_c) + self.regParams(ma2_c) + self.regParams(ma1_o) + self.regParams(ma2_o) + self.regParams(ma1_l) + self.regParams(ma2_l) + self.regParams(ma1_h) + self.regParams(ma2_h)+ self.regParams(up_pn_c_12) + self.regParams(dn_pn_c_12) + self.regParams(up_pn_c_3) + self.regParams(dn_pn_c_3) + self.regParams(pbol1_c) + self.regParams(pbol2_c) + self.regParams(pbol1_o) + self.regParams(pbol2_o) + self.regParams(pbol1_h) + self.regParams(pbol2_h) + self.regParams(pbol1_l) + self.regParams(pbol2_l)
+    levels_ = c_[len(c_)-1] - np.array(self.levels)
+    a_ = levels_.tolist() + dates + self.regParams(l_) + self.regParams(h_) + self.regParams(c_) + self.regParams(o_) + self.regParams(ma1_c) + self.regParams(ma2_c) + self.regParams(ma1_o) + self.regParams(ma2_o) + self.regParams(ma1_l) + self.regParams(ma2_l) + self.regParams(ma1_h) + self.regParams(ma2_h)+ self.regParams(up_pn_c_12) + self.regParams(dn_pn_c_12) + self.regParams(up_pn_c_3) + self.regParams(dn_pn_c_3) + self.regParams(pbol1_c) + self.regParams(pbol2_c) + self.regParams(pbol1_o) + self.regParams(pbol2_o) + self.regParams(pbol1_h) + self.regParams(pbol2_h) + self.regParams(pbol1_l) + self.regParams(pbol2_l)
     return a_,last
 
   def get_feats(self,x):
@@ -184,7 +195,8 @@ class NN(object):
     self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
     self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
 
-   # self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
+  #  self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
+   # self.model.add(LSTM(4,input_shape=(1,self.lookback)))
 
     self.model.add(Dense(3,activation='softmax',kernel_initializer='glorot_uniform'))
     self.model.compile(loss='categorical_crossentropy', optimizer='RMSprop', metrics=['accuracy'])
@@ -192,6 +204,7 @@ class NN(object):
   def create_model(self,data,chromosome):
     t0 = datetime.now()
     self.data = data
+    self.levels = self.levels_(self.data["ask_close"].values.tolist(),10)
     self.lookback = chromosome[0]
     self.lookforward = chromosome[1]
     self.targeted_pips = chromosome[2]
@@ -208,6 +221,7 @@ class NN(object):
 
   def predict(self,data,instance):
     self.data = data
+    self.levels = instance.levels 
     self.add_MAS()
     observation = self.get_feats(instance.lookback)
     scaled_observation = instance.std_scale.transform(observation)

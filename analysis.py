@@ -8,24 +8,10 @@ from pprint import pprint as pp
 col = MongoClient("mongodb://localhost:27017").backtests.EURUSD
 arr = []
 
-for i in col.find({ 'new':1 }):
+for i in col.find({ 'new':7 }):
   arr.append(i)
 
 a = arr[0]["backtest"]
-
-#time = np.array(map(lambda x:dateutil.parser.parse(x["time"]),a))
-#ask = np.array(map(lambda x:x["openAsk"],a))
-#bid = np.array(map(lambda x:x["openBid"],a))
-
-#trades = filter(lambda x:x["tradeType"] if "tradeType" in x else None,a)
-#sell = filter(lambda x:x["tradeType"] == "sell", trades)
-#buy = filter(lambda x:x["tradeType"] == "buy", trades)
-
-#buy_time = np.array(map(lambda x:dateutil.parser.parse(x["time"]),buy))
-#sell_time = np.array(map(lambda x:dateutil.parser.parse(x["time"]),sell))
-
-#buy_prices = np.array(map(lambda x:x["tradePrice"],buy))
-#sell_prices = np.array(map(lambda x:x["tradePrice"],sell))
 
 
 def values_(key,variable):
@@ -40,6 +26,45 @@ def trades_(keys,variable,f):
    trades = filter(lambda x:x["tradeType"] if "tradeType" in x else None,variable)
    trade_type = filter(lambda x:x["tradeType"] == keys[0],trades)
    return f(keys[1],trade_type)
+
+def repulsores_(key,variable,n):
+  data = map(lambda x:x[key],variable)
+  levels = []
+  arr = []
+  for i,d in enumerate(data):
+    if i > 0:
+      a = data[i] - data[i-1]
+      arr.append(a)
+  count = 0
+  while count < n:
+    Min_inx = arr.index(min(arr)) + 0
+    Min_val = data[Min_inx]
+    arr[Min_inx - 0] = 0
+    Max_inx = arr.index(max(arr)) + 0
+    Max_val = data[Max_inx]
+    arr[Max_inx - 0] = 0
+    levels.append(Min_val)
+    levels.append(Max_val)
+    count += 1
+  return levels
+
+
+def levels_(data,n):
+##  data = map(lambda x:x[key],variable)
+  levels = []
+  chunks = np.array_split(np.array(data),n)
+  for i in chunks:
+    levels.append(np.min(i))
+    levels.append(np.max(i))
+    levels.append(np.mean(i))
+  return levels
+
+
+def graph_levels(data,levels):
+  plt.plot(data,"black")
+  for l in levels:
+    plt.plot((0,len(data)),(l,l),"red")
+  plt.show()
 
 
 def graph_(a,values_,time_,trades_): 
