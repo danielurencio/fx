@@ -54,7 +54,7 @@ class Memory:   # stored as ( s, a, r, s_ )
 
 #-------------------- AGENT ---------------------------
 MEMORY_CAPACITY = 100000
-BATCH_SIZE = 64
+BATCH_SIZE = 3000
 
 GAMMA = 0.99
 
