@@ -27,7 +27,7 @@ class Brain:
         return model
 
     def train(self, x, y, epoch=1, verbose=0):
-        self.model.fit(x, y, batch_size=64, nb_epoch=epoch, verbose=verbose)
+        self.model.fit(x, y, batch_size=300, nb_epoch=epoch, verbose=verbose)
 
     def predict(self, s):
         return self.model.predict(s)
@@ -54,7 +54,7 @@ class Memory:   # stored as ( s, a, r, s_ )
 
 #-------------------- AGENT ---------------------------
 MEMORY_CAPACITY = 100000
-BATCH_SIZE = 3000
+BATCH_SIZE = 300
 
 GAMMA = 0.99
 
