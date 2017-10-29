@@ -1,4 +1,4 @@
-import os 
+import sys 
 from models.dqn import MarketEnv
 import random, numpy, math, gym
 
