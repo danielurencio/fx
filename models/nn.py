@@ -13,6 +13,13 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 
+class prediction_history(Callback):
+    def __init__(self):
+        self.predhis = []
+    def on_epoch_end(self, epoch, logs={}):
+        self.predhis.append(self.fitness())
+
+
 class EarlyStoppingByLossVal(Callback):
     def __init__(self, monitor='val_loss', value=0.46, verbose=0):
         super(Callback, self).__init__()
@@ -195,7 +202,7 @@ class NN(object):
     self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
     self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
 
-  #  self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
+ #   self.model.add(Dense(90, activation='relu',kernel_initializer='glorot_uniform'))
    # self.model.add(LSTM(4,input_shape=(1,self.lookback)))
 
     self.model.add(Dense(3,activation='softmax',kernel_initializer='glorot_uniform'))

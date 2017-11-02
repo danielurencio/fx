@@ -6,7 +6,7 @@ from pymongo import MongoClient
 
 col = MongoClient("mongodb://localhost:27017").backtests.EURUSD
 
-token = sys.argv[1]
+token = "104dd2e9ef92e4390fc2c542f7b308c2-1c10699f58f077cb9b4392a74777a7fe"#sys.argv[1]
 
 dates_modelo = ('2017-01-02','2017-02-27')
 dates_bt = ('2017-02-27','2017-03-04')
@@ -26,8 +26,8 @@ nn = NN()
 trade = []
 balance = 100
 units = 100
-tp = 0.001
-sl = 0.001
+tp = 0.0015
+sl = 0.0015
 
 backtestObj = {
  'when':datetime.datetime.now().isoformat(),

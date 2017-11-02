@@ -3,7 +3,7 @@ import numpy as np
 
 class MarketEnv:
   def __init__(self,token,dates):
-    self.lookback = 9
+    self.lookback = 4*12
     self.token = token
     self.dates = dates
     self.data = self.get_data()
@@ -26,31 +26,65 @@ class MarketEnv:
 
   def reset(self):
     self.count = 1
-    return np.append(self.data[0],0)
+    state = np.append(self.data[0],0)
+    return np.append(state,0)
 
   def step(self,action):
-    if( self.count < len(self.data) ):
-      state = np.append(self.data[self.count],len(self.trade))
+    state = self.State(action)
+    if( self.count < len(self.data)-1 ):
       reward = self.reward_signal(state,action)
+      if( len(self.trade) == 0 ): # change whether a traded is carried and its balance
+	state[state.shape[0]-2] = 0
+        state[state.shape[0]-1] = 0
       done = False
       self.count += 1
     else:
-      state = self.data[self.data.shape[0]-1]
-      reward = self.reward_signal(state,action)
+      if( len(self.trade) > 0 ):
+	if( self.trade[0]["type"] == "sell" ):
+	  remainder = self.trade[0]["price"] - self.currentPrice
+	elif( self.trade[0]["type"] == "buy" ):
+	  remainder = self.currentPrice - self.trade[0]["price"]
+	remainder *= self.units
+      else:
+	remainder = 0
+      reward = self.reward_signal(state,action) + remainder
       done = True
     return state,reward,done
 
-  def reward_signal(self,state,action):
-    close_price = state[state.shape[0]-3]
+  def tradeType(self):
+    if(len(self.trade) > 0):
+      if(self.trade[0]["type"] == "buy"):
+        return 1
+      else:
+	return -1
+    else:
+      return 0
+
+  def State(self,action):
+    self.previousPrice = self.data[self.count-1][self.data[self.count-1].shape[0]-2]
+    self.currentPrice = self.data[self.count][self.data[self.count].shape[0]-2]
     if( len(self.trade) == 0 ):
       if( action == 0 ):
-        self.trade.append({ "type":"sell","price":close_price })
+        self.trade.append({ "type":"sell","price":self.previousPrice })
+	self.balance = self.trade[0]["price"] - self.currentPrice
       if( action == 2 ):
-        self.trade.append({ "type":"buy","price":close_price })
+        self.trade.append({ "type":"buy","price":self.previousPrice })
+	self.balance = self.currentPrice - self.trade[0]["price"]
+    else:
+      if(self.trade[0]['type'] == "sell"):
+	self.balance = self.trade[0]["price"] - self.currentPrice
+      elif(self.trade[0]['type'] == "buy"):
+	self.balance = self.currentPrice - self.trade[0]["price"]
+    self.balance *= self.units
+    state = np.append(self.data[self.count],self.tradeType())
+    return np.append(state,self.balance)
+
+  def reward_signal(self,state,action):
+    if( len(self.trade) == 0 ):
       reward = 0
     else:
       if( action == 0 and self.trade[0]['type'] == 'buy'):
-	reward = (self.trade[0]["price"] - close_price) * self.units
+	reward = (self.previousPrice - self.trade[0]["price"]) * self.units
 	del self.trade[0]
       if( len(self.trade) == 1 ):
         if( action == 0 and self.trade[0]['type'] == 'sell'):
@@ -58,7 +92,7 @@ class MarketEnv:
       if( action == 1 ):
 	reward = 0
       if( action == 2 and self.trade[0]['type'] == 'sell'):
-	reward = (close_price - self.trade[0]["price"]) * self.units
+	reward = (self.trade[0]["price"] - self.previousPrice) * self.units
 	del self.trade[0]
       if( len(self.trade) == 1 ):
         if( action == 2 and self.trade[0]['type'] == 'buy'):
