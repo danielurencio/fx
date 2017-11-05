@@ -11,10 +11,10 @@ import tensorflow as tf
 col = MongoClient("mongodb://localhost:27017").backtests.EURUSD
 
 #----------
-HUBER_LOSS_DELTA = 1.0
+HUBER_LOSS_DELTA = 1
 LEARNING_RATE = 0.00025
 MEMORY_CAPACITY = 100000
-BATCH_SIZE = 150
+BATCH_SIZE = 50
 GAMMA = 0.99
 MAX_EPSILON = 1
 MIN_EPSILON = 0.01
@@ -50,6 +50,7 @@ class Brain:
         model = Sequential()
 
         model.add(Dense(300, activation='relu', input_dim=stateCnt))
+        model.add(Dense(300, activation='relu'))
         model.add(Dense(300, activation='relu'))
         model.add(Dense(actionCnt, activation='linear'))
 
@@ -208,10 +209,10 @@ class Environment:
 #-------------------- MAIN ----------------------------
 if __name__ == "__main__":
   token = sys.argv[1]
-  mkt_env = MarketEnv(token,('2017-01-02','2017-01-06'))
+  mkt_env = MarketEnv(token,('2017-07-31','2017-08-25'))
   env = Environment()
 
-  stateCnt  = (mkt_env.lookback*4) + 2
+  stateCnt  = mkt_env.data.shape[1] + 2#(mkt_env.lookback*1) + 2
   actionCnt = 3#env.env.action_space.n
 
   agent = Agent(stateCnt, actionCnt)

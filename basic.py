@@ -57,7 +57,7 @@ class Memory:   # stored as ( s, a, r, s_ )
 
 #-------------------- AGENT ---------------------------
 MEMORY_CAPACITY = 100000
-BATCH_SIZE = 300
+BATCH_SIZE = 30
 
 GAMMA = 0.99
 
@@ -150,10 +150,10 @@ class Environment:
 #-------------------- MAIN ----------------------------
 if __name__ == "__main__":
   token = sys.argv[1]
-  mkt_env = MarketEnv(token,('2017-01-02','2017-02-27'))
+  mkt_env = MarketEnv(token,('2017-01-02','2017-01-27'))
   env = Environment()
 
-  stateCnt  = (mkt_env.lookback * 4) + 1
+  stateCnt  = (mkt_env.lookback * 4) + 2
   actionCnt = 3#env.env.action_space.n
 
   agent = Agent(stateCnt, actionCnt)
@@ -164,4 +164,4 @@ if __name__ == "__main__":
           env.run(agent,mkt_env,episode)
           episode += 1
   finally:
-      agent.brain.model.save("basic.h5")
+      agent.brain.model.save("basic_.h5")

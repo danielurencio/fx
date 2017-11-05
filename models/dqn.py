@@ -1,9 +1,10 @@
 from backtest.backtest_candles import get_candles
+from scipy import stats
 import numpy as np
 
 class MarketEnv:
   def __init__(self,token,dates):
-    self.lookback = 4*12
+    self.lookback = 12
     self.token = token
     self.dates = dates
     self.data = self.get_data()
@@ -16,12 +17,29 @@ class MarketEnv:
     data = get_candles(self.dates,self.token)
     fn = lambda x:[x['openAsk'],x['highAsk'],x['closeAsk'],x['lowAsk']]
     candles = np.array(map(fn,data))
-    return self.series(candles)
+    a = self.series(candles)
+    b = self.series_(candles)
+    return np.hstack((a,b))
 
-  def series(self,data):
+  def series_(self,data):
     series = []
     for i in range( len(data) - (self.lookback-1) ):
       series.append(np.hstack(data[i:i+self.lookback]))
+    return np.array(series)
+
+  def series(self,data):
+    series = []
+    for i in range( len(data) - (self.lookback - 1) ):
+      a = data[i:i+self.lookback]
+      b = []
+      for j in range(a.shape[1]):
+        x_r, y_r = [], []
+        for ix,dd in enumerate(a[:,j].tolist()):
+          x_r.append(ix)
+          y_r.append(dd)
+        slope, intercept, rvalue, pval, stderr = stats.linregress(x_r,y_r)
+        b.append([slope,intercept,rvalue])
+      series.append(np.hstack(b))
     return np.array(series)
 
   def reset(self):

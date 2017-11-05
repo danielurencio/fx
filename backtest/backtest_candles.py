@@ -7,7 +7,7 @@ import sys
 
 def get_candles(dates,token):
   oanda = opy.API(environment="practice", access_token=token)
-  data = oanda.get_history(instrument="EUR_USD", start=dates[0],end=dates[1],granularity="M15")
+  data = oanda.get_history(instrument="EUR_USD", start=dates[0],end=dates[1],granularity="H1")
   return data["candles"]
 
 
