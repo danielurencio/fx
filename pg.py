@@ -7,12 +7,12 @@ from PG_AGENT import agent, discount_rewards
 from models.dqn import MarketEnv
 
 token = "e77055f347d78cf98d75dbd2f5db5821-9eeb3a18e4f8484c84fd6f3267c42b26"
-env = gym.make("CartPole-v0")
+#env = gym.make("CartPole-v0")
 env = MarketEnv(token,('2017-01-02','2017-01-27'))
 
 tf.reset_default_graph() #Clear the Tensorflow graph.
 
-myAgent = agent(lr=1e-4,s_size=62,a_size=3,h_size=100) #Load the agent.
+myAgent = agent(lr=1e-4,s_size=env.data.shape[1]+2,a_size=3,h_size=100) #Load the agent.
 
 total_episodes = 5000 #Set total number of episodes to train agent on.
 max_ep = 999

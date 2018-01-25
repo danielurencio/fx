@@ -4,10 +4,11 @@ import numpy as np
 
 class MarketEnv:
   def __init__(self,token,dates):
+    self.mas = [8,24]
     self.lookback = 12
     self.token = token
     self.dates = dates
-    self.data = self.get_data()
+    self.data = self.MA_state()#self.get_data()
     self.count = 1
     self.balance = 100
     self.units = 100
@@ -16,16 +17,43 @@ class MarketEnv:
   def get_data(self):
     data = get_candles(self.dates,self.token)
     fn = lambda x:[x['openAsk'],x['highAsk'],x['closeAsk'],x['lowAsk']]
-    candles = np.array(map(fn,data))
-    a = self.series(candles)
-    b = self.series_(candles)
-    return np.hstack((a,b))
+    self.candles = np.array(map(fn,data))
+#    a = self.series(candles)
+#    b = self.series_(candles)
+#    return np.hstack((a,b))
 
   def series_(self,data):
     series = []
     for i in range( len(data) - (self.lookback-1) ):
       series.append(np.hstack(data[i:i+self.lookback]))
     return np.array(series)
+
+  def moving_averages(self):
+    self.get_data()
+    _series = []
+    for ma in self.mas:
+      lowerBound = ma - min(self.mas)
+      self.lookback = ma
+      serie = self.series_(self.candles[:,2])
+      serie = map(lambda x:np.mean(x),serie)
+      serie = np.vstack(serie)
+      _series.append(serie)
+    lengths = map(lambda x:x.shape[0],_series)
+    difs = map(lambda x: x - min(lengths),lengths)
+    for i,d in enumerate(_series):
+      _series[i] = _series[i][difs[i]:,]
+    self.computed_movingAverages = np.hstack(_series) 
+
+  def MA_state(self):
+    self.moving_averages()
+    self.lookback = 8
+    lowerBound = self.candles.shape[0] - self.computed_movingAverages.shape[0]
+    data = self.candles[lowerBound:,:]
+    data = np.hstack([data,self.computed_movingAverages])
+    arr = []
+    for i in xrange(data.shape[1]):
+      arr.append(self.series_(data[:,i]))
+    return np.hstack(arr)
 
   def series(self,data):
     series = []
