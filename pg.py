@@ -10,7 +10,8 @@ from pymongo import MongoClient
 
 token = "e77055f347d78cf98d75dbd2f5db5821-9eeb3a18e4f8484c84fd6f3267c42b26"
 #env = gym.make("CartPole-v0")
-env = MarketEnv(token,('2017-01-02','2017-01-27'),True)
+dates = ('2017-01-02','2017-01-27')
+env = MarketEnv(token,dates,True)
 lr = 1e-3
 
 tf.reset_default_graph() #Clear the Tensorflow graph.
@@ -21,7 +22,7 @@ total_episodes = 5000 #Set total number of episodes to train agent on.
 max_ep = 999
 update_frequency = 10
 
-col_name = "lr_" + str(lr) + "_ma_" + str(env.mas) + "_maxlb_" + str(env.max_lookback) 
+col_name = "lr_" + str(lr) + "_ma_" + str(env.mas) + "_maxlb_" + str(env.max_lookback) + "_" + str(dates) 
 print col_name
 col = MongoClient("mongodb://localhost:27017").PG[col_name]
 
