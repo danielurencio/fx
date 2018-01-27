@@ -4,11 +4,13 @@ from sklearn import preprocessing
 import numpy as np
 
 class MarketEnv:
-  def __init__(self,token,dates):
+  def __init__(self,token,dates,normalization):
     self.mas = [8,24]
-    self.lookback = 12
+    self.lookback = None
+    self.max_lookback = 8
     self.token = token
     self.dates = dates
+    self.normalization = normalization
     self.data = self.MA_state()#self.get_data()
     self.count = 1
     self.balance = 100
@@ -47,7 +49,7 @@ class MarketEnv:
 
   def MA_state(self):
     self.moving_averages()
-    self.lookback = 8
+    self.lookback = self.max_lookback
     lowerBound = self.candles.shape[0] - self.computed_movingAverages.shape[0]
     data = self.candles[lowerBound:,:]
     data = np.hstack([data,self.computed_movingAverages])
@@ -55,9 +57,10 @@ class MarketEnv:
     for i in xrange(data.shape[1]):
       arr.append(self.series_(data[:,i]))
     data = np.hstack(arr)
-    self.closingPriceIndex = (3 * self.lookback) - 1
-#    self.scaler = preprocessing.StandardScaler().fit(data)
-#    data = self.scaler.transform(data)
+    self.closingPriceIndex = (3 * self.max_lookback) - 1
+    if self.normalization:
+      self.scaler = preprocessing.StandardScaler().fit(data)
+      data = self.scaler.transform(data)
     return data
 
   def series(self,data):
@@ -114,6 +117,10 @@ class MarketEnv:
   def State(self,action):
     self.previousPrice = self.data[self.count-1][self.closingPriceIndex]
     self.currentPrice = self.data[self.count][self.closingPriceIndex]
+    if self.normalization:
+      temp_data = self.scaler.inverse_transform(self.data)
+      self.previousPrice = temp_data[self.count-1][self.closingPriceIndex]
+      self.currentPrice = temp_data[self.count][self.closingPriceIndex]
     if( len(self.trade) == 0 ):
       if( action == 0 ):
         self.trade.append({ "type":"sell","price":self.previousPrice })

@@ -6,18 +6,24 @@ import gym
 from sklearn import preprocessing
 from PG_AGENT import agent, discount_rewards
 from models.dqn import MarketEnv
+from pymongo import MongoClient
 
 token = "e77055f347d78cf98d75dbd2f5db5821-9eeb3a18e4f8484c84fd6f3267c42b26"
 #env = gym.make("CartPole-v0")
-env = MarketEnv(token,('2017-01-02','2017-01-27'))
+env = MarketEnv(token,('2017-01-02','2017-01-27'),True)
+lr = 1e-3
 
 tf.reset_default_graph() #Clear the Tensorflow graph.
 
-myAgent = agent(lr=1e-3,s_size=env.data.shape[1]+2,a_size=3,h_size=120) #Load the agent.
+myAgent = agent(lr=lr,s_size=env.data.shape[1]+2,a_size=3,h_size=120) #Load the agent.
 
 total_episodes = 5000 #Set total number of episodes to train agent on.
 max_ep = 999
 update_frequency = 10
+
+col_name = "lr_" + str(lr) + "_ma_" + str(env.mas) + "_maxlb_" + str(env.max_lookback) 
+print col_name
+col = MongoClient("mongodb://localhost:27017").PG[col_name]
 
 init = tf.global_variables_initializer()
 
@@ -68,8 +74,11 @@ with tf.Session() as sess:
 
         
             #Update our running tally of scores.
-        if i % 100 == 0:
-            print(np.mean(total_reward), np.std(total_reward),len(ep_history))
-            total_reward = []
+        if i % 100 == 0 and i != 0:
+	  d_ = { 'ep':i,'mean':np.mean(total_reward),'std':np.std(total_reward) }
+	  print d_
+	  col.insert_one(d_)
+          #print(i,np.mean(total_reward), np.std(total_reward),len(ep_history))
+          total_reward = []
         i += 1
 
