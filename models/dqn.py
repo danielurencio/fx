@@ -55,8 +55,9 @@ class MarketEnv:
     for i in xrange(data.shape[1]):
       arr.append(self.series_(data[:,i]))
     data = np.hstack(arr)
-    scaler = preprocessing.StandardScaler().fit(data)
-    data = scaler.transform(data)
+    self.closingPriceIndex = (3 * self.lookback) - 1
+#    self.scaler = preprocessing.StandardScaler().fit(data)
+#    data = self.scaler.transform(data)
     return data
 
   def series(self,data):
@@ -111,8 +112,8 @@ class MarketEnv:
       return 0
 
   def State(self,action):
-    self.previousPrice = self.data[self.count-1][self.data[self.count-1].shape[0]-2]
-    self.currentPrice = self.data[self.count][self.data[self.count].shape[0]-2]
+    self.previousPrice = self.data[self.count-1][self.closingPriceIndex]
+    self.currentPrice = self.data[self.count][self.closingPriceIndex]
     if( len(self.trade) == 0 ):
       if( action == 0 ):
         self.trade.append({ "type":"sell","price":self.previousPrice })
