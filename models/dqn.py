@@ -1,5 +1,6 @@
 from backtest.backtest_candles import get_candles
 from scipy import stats
+from sklearn import preprocessing
 import numpy as np
 
 class MarketEnv:
@@ -53,7 +54,10 @@ class MarketEnv:
     arr = []
     for i in xrange(data.shape[1]):
       arr.append(self.series_(data[:,i]))
-    return np.hstack(arr)
+    data = np.hstack(arr)
+    scaler = preprocessing.StandardScaler().fit(data)
+    data = scaler.transform(data)
+    return data
 
   def series(self,data):
     series = []

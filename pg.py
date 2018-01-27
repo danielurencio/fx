@@ -3,6 +3,7 @@ import tensorflow.contrib.slim as slim
 import numpy as np
 import matplotlib.pyplot as plt
 import gym
+from sklearn import preprocessing
 from PG_AGENT import agent, discount_rewards
 from models.dqn import MarketEnv
 
@@ -12,7 +13,7 @@ env = MarketEnv(token,('2017-01-02','2017-01-27'))
 
 tf.reset_default_graph() #Clear the Tensorflow graph.
 
-myAgent = agent(lr=1e-4,s_size=env.data.shape[1]+2,a_size=3,h_size=100) #Load the agent.
+myAgent = agent(lr=1e-5,s_size=env.data.shape[1]+2,a_size=3,h_size=120) #Load the agent.
 
 total_episodes = 5000 #Set total number of episodes to train agent on.
 max_ep = 999
