@@ -10,9 +10,9 @@ from pymongo import MongoClient
 
 token = "e77055f347d78cf98d75dbd2f5db5821-9eeb3a18e4f8484c84fd6f3267c42b26"
 #env = gym.make("CartPole-v0")
-dates = ('2017-01-02','2017-02-28')
+dates = ('2017-01-02','2017-01-27')
 env = MarketEnv(token,dates,True)
-lr = 1e-3
+lr = 1e-4
 
 tf.reset_default_graph() #Clear the Tensorflow graph.
 
