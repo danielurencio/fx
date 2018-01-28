@@ -7,7 +7,7 @@ class MarketEnv:
   def __init__(self,token,dates,normalization):
     self.mas = [8,24]
     self.lookback = None
-    self.max_lookback = 8
+    self.max_lookback = 24
     self.token = token
     self.dates = dates
     self.normalization = normalization
