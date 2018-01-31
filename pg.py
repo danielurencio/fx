@@ -12,6 +12,10 @@ token = "e77055f347d78cf98d75dbd2f5db5821-9eeb3a18e4f8484c84fd6f3267c42b26"
 #env = gym.make("CartPole-v0")
 dates = ('2017-01-02','2017-01-27')
 env = MarketEnv(token,dates,True)
+
+dates_ = ('2017-01-30','2017-02-02')
+env_ = MarketEnv(token,dates_,True)
+
 lr = 1e-4
 
 tf.reset_default_graph() #Clear the Tensorflow graph.
@@ -33,6 +37,7 @@ with tf.Session() as sess:
     sess.run(init)
     i = 0
     total_reward = []
+    test_total_reward = []
     total_lenght = []
         
     gradBuffer = sess.run(tf.trainable_variables())
@@ -76,7 +81,22 @@ with tf.Session() as sess:
         
             #Update our running tally of scores.
         if i % 100 == 0 and i != 0:
-	  d_ = { 'ep':i,'mean':np.mean(total_reward),'std':np.std(total_reward) }
+          test_on = False
+	  s_ = env_.reset()
+	  test_running_reward = 0
+
+	  while test_on == False:
+	    a_dist_ = sess.run(myAgent.output,feed_dict={myAgent.state_in:[s_]})
+	    a_ = np.random.choice(a_dist_[0],p=a_dist_[0])
+	    a_ = np.argmax(a_dist_ == a_)
+	    s1_,r_,test_on = env_.step(a_)
+	    s_ = s1_
+	    test_running_reward += r_
+
+	  _mean = round(np.mean(total_reward),3)
+	  _std = round(np.std(total_reward),3)
+	  _test_mean = round(np.mean(test_running_reward),3)
+	  d_ = { 'ep':i,'mean':_mean,'std':_std, 'test_mean':_test_mean }
 	  print d_
 	  col.insert_one(d_)
           #print(i,np.mean(total_reward), np.std(total_reward),len(ep_history))
