@@ -9,12 +9,16 @@ from models.dqn import MarketEnv
 from pymongo import MongoClient
 
 token = "e77055f347d78cf98d75dbd2f5db5821-9eeb3a18e4f8484c84fd6f3267c42b26"
-#env = gym.make("CartPole-v0")
-dates = ('2017-01-02','2017-01-27')
-env = MarketEnv(token,dates,True)
 
-dates_ = ('2017-01-30','2017-02-02')
-env_ = MarketEnv(token,dates_,True)
+max_lookback = 48
+
+dates = ('2016-12-05','2017-01-27')
+#dates = ('2017-01-30','2017-02-02')
+
+env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
+
+dates_ = ('2017-01-30','2017-02-10')
+env_ = MarketEnv(token,dates_,normalization=True,max_lookback=max_lookback)
 
 lr = 1e-4
 
@@ -22,7 +26,7 @@ tf.reset_default_graph() #Clear the Tensorflow graph.
 
 myAgent = agent(lr=lr,s_size=env.data.shape[1]+2,a_size=3,h_size=120) #Load the agent.
 
-total_episodes = 5000 #Set total number of episodes to train agent on.
+total_episodes = 50000000 #Set total number of episodes to train agent on.
 max_ep = 999
 update_frequency = 10
 
@@ -51,7 +55,6 @@ with tf.Session() as sess:
         for j in range(max_ep):
             #Probabilistically pick an action given our network outputs.
             a_dist = sess.run(myAgent.output,feed_dict={myAgent.state_in:[s]})
-	    
             a = np.random.choice(a_dist[0],p=a_dist[0])
             a = np.argmax(a_dist == a)
             s1,r,d = env.step(a) #Get our reward for taking an action given a bandit.
@@ -75,7 +78,7 @@ with tf.Session() as sess:
                         gradBuffer[ix] = grad * 0
                 
                 total_reward.append(running_reward)
-                total_lenght.append(j)
+                #total_lenght.append(j)
                 break
 
         
@@ -87,19 +90,19 @@ with tf.Session() as sess:
 
 	  while test_on == False:
 	    a_dist_ = sess.run(myAgent.output,feed_dict={myAgent.state_in:[s_]})
-	    a_ = np.random.choice(a_dist_[0],p=a_dist_[0])
-	    a_ = np.argmax(a_dist_ == a_)
+	    a_ = np.argmax(a_dist_)
+#	    a_ = np.random.choice(a_dist_[0],p=a_dist_[0])
+#	    a_ = np.argmax(a_dist_ == a_)
 	    s1_,r_,test_on = env_.step(a_)
 	    s_ = s1_
 	    test_running_reward += r_
 
-	  _mean = round(np.mean(total_reward),3)
+	  _mean = round(np.nanmean(total_reward),3)
 	  _std = round(np.std(total_reward),3)
 	  _test_mean = round(np.mean(test_running_reward),3)
 	  d_ = { 'ep':i,'mean':_mean,'std':_std, 'test_mean':_test_mean }
 	  print d_
-	  col.insert_one(d_)
-          #print(i,np.mean(total_reward), np.std(total_reward),len(ep_history))
+#	  col.insert_one(d_)
           total_reward = []
         i += 1
 

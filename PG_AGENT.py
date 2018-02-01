@@ -20,7 +20,7 @@ class agent():
         self.state_in= tf.placeholder(shape=[None,s_size],dtype=tf.float32)
         hidden = slim.fully_connected(self.state_in,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
         hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
-#        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
+        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
         self.output = slim.fully_connected(hidden,a_size,activation_fn=tf.nn.softmax,biases_initializer=None)
         self.chosen_action = tf.argmax(self.output,1)
 

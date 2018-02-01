@@ -4,10 +4,10 @@ from sklearn import preprocessing
 import numpy as np
 
 class MarketEnv:
-  def __init__(self,token,dates,normalization):
+  def __init__(self,token,dates,normalization,max_lookback=24):
     self.mas = [8,24]
     self.lookback = None
-    self.max_lookback = 24
+    self.max_lookback = max_lookback
     self.token = token
     self.dates = dates
     self.normalization = normalization
