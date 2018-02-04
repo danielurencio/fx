@@ -1,6 +1,7 @@
 from backtest.backtest_candles import get_candles
 from scipy import stats
 from sklearn import preprocessing
+from crypto import crypto
 import numpy as np
 
 class MarketEnv:
@@ -13,8 +14,8 @@ class MarketEnv:
     self.normalization = normalization
     self.data = self.MA_state()#self.get_data()
     self.count = 1
-    self.balance = 100
-    self.units = 100
+    self.balance = 0.02
+    self.units = self.balance * 5
     self.trade = []
 
   def get_data(self):
@@ -33,6 +34,7 @@ class MarketEnv:
 
   def moving_averages(self):
     self.get_data()
+#    self.candles = crypto.candles(self.dates)
     _series = []
     for ma in self.mas:
       lowerBound = ma - min(self.mas)

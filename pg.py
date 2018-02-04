@@ -12,12 +12,12 @@ token = "e77055f347d78cf98d75dbd2f5db5821-9eeb3a18e4f8484c84fd6f3267c42b26"
 
 max_lookback = 48
 
-dates = ('2016-12-05','2017-01-27')
+dates = ('2017-11-01','2017-12-31')
 #dates = ('2017-01-30','2017-02-02')
 
 env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
 
-dates_ = ('2017-01-30','2017-02-10')
+dates_ = ('2018-01-01','2018-01-07')
 env_ = MarketEnv(token,dates_,normalization=True,max_lookback=max_lookback)
 
 lr = 1e-4
@@ -97,9 +97,9 @@ with tf.Session() as sess:
 	    s_ = s1_
 	    test_running_reward += r_
 
-	  _mean = round(np.nanmean(total_reward),3)
-	  _std = round(np.std(total_reward),3)
-	  _test_mean = round(np.mean(test_running_reward),3)
+	  _mean = np.nanmean(total_reward)
+	  _std = np.std(total_reward)
+	  _test_mean = np.mean(test_running_reward)
 	  d_ = { 'ep':i,'mean':_mean,'std':_std, 'test_mean':_test_mean }
 	  print d_
 #	  col.insert_one(d_)
