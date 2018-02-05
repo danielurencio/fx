@@ -7,6 +7,7 @@ from sklearn import preprocessing
 from PG_AGENT import agent, discount_rewards
 from models.dqn import MarketEnv
 from pymongo import MongoClient
+import sys
 
 token = "e77055f347d78cf98d75dbd2f5db5821-9eeb3a18e4f8484c84fd6f3267c42b26"
 
@@ -30,7 +31,7 @@ total_episodes = 50000000 #Set total number of episodes to train agent on.
 max_ep = 999
 update_frequency = 10
 
-col_name = "lr_" + str(lr) + "_ma_" + str(env.mas) + "_maxlb_" + str(env.max_lookback) + "_" + str(dates) 
+col_name = "lr_" + str(lr) + "_ma_" + str(env.mas) + "_maxlb_" + str(env.max_lookback) + "_" + str(dates) + "_" + sys.argv[1] 
 print col_name
 col = MongoClient("mongodb://localhost:27017").PG[col_name]
 
@@ -101,8 +102,8 @@ with tf.Session() as sess:
 	  _std = np.std(total_reward)
 	  _test_mean = np.mean(test_running_reward)
 	  d_ = { 'ep':i,'mean':_mean,'std':_std, 'test_mean':_test_mean }
-	  print d_
-#	  col.insert_one(d_)
+#	  print d_
+	  col.insert_one(d_)
           total_reward = []
         i += 1
 
