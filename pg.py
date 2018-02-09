@@ -19,7 +19,10 @@ dates = ('2017-11-01','2017-12-31')
 env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
 
 dates_ = ('2018-01-01','2018-01-07')
+dates_valid = ('2018-01-08','2018-01-14')
+
 env_ = MarketEnv(token,dates_,normalization=True,max_lookback=max_lookback)
+env__ = MarketEnv(token,dates_valid,normalization=True,max_lookback=max_lookback)
 
 lr = 1e-4
 
@@ -86,23 +89,32 @@ with tf.Session() as sess:
             #Update our running tally of scores.
         if i % 100 == 0 and i != 0:
           test_on = False
+	  test_on_ = False
 	  s_ = env_.reset()
+	  s__ = env__.reset()
 	  test_running_reward = 0
+	  valid_running_reward = 0
 
-	  while test_on == False:
+	  while test_on_ == False:
 	    a_dist_ = sess.run(myAgent.output,feed_dict={myAgent.state_in:[s_]})
+	    a_dist__ = sess.run(myAgent.output,feed_dict={myAgent.state_in:[s__]})
 	    a_ = np.argmax(a_dist_)
+	    a__ = np.argmax(a_dist__)
 #	    a_ = np.random.choice(a_dist_[0],p=a_dist_[0])
 #	    a_ = np.argmax(a_dist_ == a_)
 	    s1_,r_,test_on = env_.step(a_)
+	    s1__,r__,test_on_ = env__.step(a__)
 	    s_ = s1_
+	    s__ = s1__
 	    test_running_reward += r_
+	    valid_running_reward += r__
 
 	  _mean = np.nanmean(total_reward)
 	  _std = np.std(total_reward)
 	  _test_mean = np.mean(test_running_reward)
-	  d_ = { 'ep':i,'mean':_mean,'std':_std, 'test_mean':_test_mean }
-#	  print d_
+	  _valid_mean = np.mean(valid_running_reward)
+	  d_ = { 'ep':i,'mean':_mean,'std':_std, 'test_mean':_test_mean, 'valid_mean':_valid_mean }
+	  print d_
 	  col.insert_one(d_)
           total_reward = []
         i += 1
