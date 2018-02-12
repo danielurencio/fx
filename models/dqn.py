@@ -1,5 +1,6 @@
 from backtest.backtest_candles import get_candles
 from scipy import stats
+from dateutil import parser
 from sklearn import preprocessing
 from crypto import crypto
 import numpy as np
@@ -13,6 +14,7 @@ class MarketEnv:
     self.dates = dates
     self.normalization = normalization
     self.data = self.MA_state()#self.get_data()
+    self.hours_ = self.Hours()
     self.count = 1
     self.balance = 0.02
     self.units = self.balance * 5
@@ -20,11 +22,16 @@ class MarketEnv:
 
   def get_data(self):
     data = get_candles(self.dates,self.token)
-    fn = lambda x:[x['openAsk'],x['highAsk'],x['closeAsk'],x['lowAsk']]
+    fn = lambda x:[x['openAsk'],x['highAsk'],x['closeAsk'],x['lowAsk']]#,parser.parse(x['time']).hour]
+    self.hours = np.array(map(lambda x:parser.parse(x['time']).hour,data))
     self.candles = np.array(map(fn,data))
 #    a = self.series(candles)
 #    b = self.series_(candles)
 #    return np.hstack((a,b))
+
+  def Hours(self):
+    dif = self.hours.shape[0] - self.data.shape[0]
+    return self.hours[dif:]
 
   def series_(self,data):
     series = []

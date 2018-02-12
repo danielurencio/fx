@@ -10,16 +10,19 @@ from pymongo import MongoClient
 import sys
 
 token = "e77055f347d78cf98d75dbd2f5db5821-9eeb3a18e4f8484c84fd6f3267c42b26"
+restore = False
+save = True
+model_path = './saved_models/' + sys.argv[1] + '/model_' + sys.argv[1] + '.ckpt'
 
 max_lookback = 48
 
-dates = ('2017-11-01','2017-12-31')
+dates = ('2017-10-02','2017-12-01')
 #dates = ('2017-01-30','2017-02-02')
 
 env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
 
-dates_ = ('2018-01-01','2018-01-07')
-dates_valid = ('2018-01-08','2018-01-14')
+dates_ = ('2017-12-04','2017-12-08')
+dates_valid = ('2017-12-11','2017-12-15')
 
 env_ = MarketEnv(token,dates_,normalization=True,max_lookback=max_lookback)
 env__ = MarketEnv(token,dates_valid,normalization=True,max_lookback=max_lookback)
@@ -38,11 +41,16 @@ col_name = "lr_" + str(lr) + "_ma_" + str(env.mas) + "_maxlb_" + str(env.max_loo
 print col_name
 col = MongoClient("mongodb://localhost:27017").PG[col_name]
 
+saver = tf.train.Saver()
 init = tf.global_variables_initializer()
 
 # Launch the tensorflow graph
 with tf.Session() as sess:
-    sess.run(init)
+    if restore:
+      saver.restore(sess,model_path)
+    else:
+      sess.run(init)
+
     i = 0
     total_reward = []
     test_total_reward = []
@@ -88,6 +96,9 @@ with tf.Session() as sess:
         
             #Update our running tally of scores.
         if i % 100 == 0 and i != 0:
+          if save:
+	    saver.save(sess,model_path)
+
           test_on = False
 	  test_on_ = False
 	  s_ = env_.reset()
@@ -114,7 +125,7 @@ with tf.Session() as sess:
 	  _test_mean = np.mean(test_running_reward)
 	  _valid_mean = np.mean(valid_running_reward)
 	  d_ = { 'ep':i,'mean':_mean,'std':_std, 'test_mean':_test_mean, 'valid_mean':_valid_mean }
-	  print d_
+#	  print d_
 	  col.insert_one(d_)
           total_reward = []
         i += 1
