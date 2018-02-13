@@ -16,8 +16,8 @@ class MarketEnv:
     self.data = self.MA_state()#self.get_data()
     self.hours_ = self.Hours()
     self.count = 1
-    self.balance = 0.02
-    self.units = self.balance * 5
+    self.balance = 100
+    self.units = self.balance * 1
     self.trade = []
 
   def get_data(self):
@@ -67,9 +67,11 @@ class MarketEnv:
       arr.append(self.series_(data[:,i]))
     data = np.hstack(arr)
     self.closingPriceIndex = (3 * self.max_lookback) - 1
-    if self.normalization:
+    if self.normalization == True: # ---------------------------------------------   normalization fix
       self.scaler = preprocessing.StandardScaler().fit(data)
       data = self.scaler.transform(data)
+    elif isinstance(self.normalization,MarketEnv) == True:
+      data = self.normalization.scaler.transform(data)
     return data
 
   def series(self,data):
@@ -126,8 +128,12 @@ class MarketEnv:
   def State(self,action):
     self.previousPrice = self.data[self.count-1][self.closingPriceIndex]
     self.currentPrice = self.data[self.count][self.closingPriceIndex]
-    if self.normalization:
+    if self.normalization == True: # -----------------------------------     normalization fix
       temp_data = self.scaler.inverse_transform(self.data)
+      self.previousPrice = temp_data[self.count-1][self.closingPriceIndex]
+      self.currentPrice = temp_data[self.count][self.closingPriceIndex]
+    elif isinstance(self.normalization,MarketEnv) == True:
+      temp_data = self.normalization.scaler.inverse_transform(self.data)
       self.previousPrice = temp_data[self.count-1][self.closingPriceIndex]
       self.currentPrice = temp_data[self.count][self.closingPriceIndex]
     if( len(self.trade) == 0 ):
@@ -144,7 +150,8 @@ class MarketEnv:
 	self.balance = self.currentPrice - self.trade[0]["price"]
     self.balance *= self.units
     state = np.append(self.data[self.count],self.tradeType())
-    return np.append(state,self.balance)
+#    return np.append(state,self.balance)
+    return state
 
   def reward_signal(self,state,action):
     if( len(self.trade) == 0 ):

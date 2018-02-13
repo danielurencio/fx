@@ -24,8 +24,8 @@ env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
 dates_ = ('2017-12-04','2017-12-08')
 dates_valid = ('2017-12-11','2017-12-15')
 
-env_ = MarketEnv(token,dates_,normalization=True,max_lookback=max_lookback)
-env__ = MarketEnv(token,dates_valid,normalization=True,max_lookback=max_lookback)
+env_ = MarketEnv(token,dates_,normalization=env,max_lookback=max_lookback)
+env__ = MarketEnv(token,dates_valid,normalization=env,max_lookback=max_lookback)
 
 lr = 1e-4
 
