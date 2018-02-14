@@ -15,8 +15,8 @@ save = True
 model_path = './saved_models/' + sys.argv[1] + '/model_' + sys.argv[1] + '.ckpt'
 
 max_lookback = 48
-
-dates = ('2017-10-02','2017-12-01')
+#2017-03-06
+dates = ('2017-11-27','2017-12-01')
 #dates = ('2017-01-30','2017-02-02')
 
 env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
@@ -31,7 +31,8 @@ lr = 1e-4
 
 tf.reset_default_graph() #Clear the Tensorflow graph.
 
-myAgent = agent(lr=lr,s_size=env.data.shape[1]+2,a_size=3,h_size=120) #Load the agent.
+
+myAgent = agent(lr=lr,s_size=env.reset().shape[0],a_size=3,h_size=120) #Load the agent.
 
 total_episodes = 50000000 #Set total number of episodes to train agent on.
 max_ep = 999
@@ -64,7 +65,8 @@ with tf.Session() as sess:
         s = env.reset()
         running_reward = 0
         ep_history = []
-        for j in range(max_ep):
+	while True:
+#        for j in range(max_ep):
             #Probabilistically pick an action given our network outputs.
             a_dist = sess.run(myAgent.output,feed_dict={myAgent.state_in:[s]})
             a = np.random.choice(a_dist[0],p=a_dist[0])
@@ -120,13 +122,13 @@ with tf.Session() as sess:
 	    test_running_reward += r_
 	    valid_running_reward += r__
 
-	  _mean = np.nanmean(total_reward)
+	  _mean = np.mean(total_reward)
 	  _std = np.std(total_reward)
 	  _test_mean = np.mean(test_running_reward)
 	  _valid_mean = np.mean(valid_running_reward)
-	  d_ = { 'ep':i,'mean':_mean,'std':_std, 'test_mean':_test_mean, 'valid_mean':_valid_mean }
-#	  print d_
-	  col.insert_one(d_)
+	  doc_ = { 'ep':i,'mean':_mean,'std':_std, 'test_mean':_test_mean, 'valid_mean':_valid_mean }
+	  print doc_
+#	  col.insert_one(doc_)
           total_reward = []
         i += 1
 

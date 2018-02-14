@@ -150,8 +150,8 @@ class MarketEnv:
 	self.balance = self.currentPrice - self.trade[0]["price"]
     self.balance *= self.units
     state = np.append(self.data[self.count],self.tradeType())
-#    return np.append(state,self.balance)
-    return state
+    return np.append(state,self.balance)
+#    return state
 
   def reward_signal(self,state,action):
     if( len(self.trade) == 0 ):
