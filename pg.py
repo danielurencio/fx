@@ -16,7 +16,7 @@ model_path = './saved_models/' + sys.argv[1] + '/model_' + sys.argv[1] + '.ckpt'
 
 max_lookback = 48
 #2017-03-06
-dates = ('2017-11-27','2017-12-01')
+dates = ('2017-03-06','2017-12-01')
 #dates = ('2017-01-30','2017-02-02')
 
 env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
@@ -86,6 +86,11 @@ with tf.Session() as sess:
                     gradBuffer[idx] += grad
 
                 if i % update_frequency == 0 and i != 0:
+#########################################################################################################33#
+                    for idx,grad in enumerate(grads):
+                      gradBuffer[idx] /= update_frequency
+#########################################################################################################33#
+
                     feed_dict =  dict(zip(myAgent.gradient_holders, gradBuffer))
                     _ = sess.run(myAgent.update_batch, feed_dict=feed_dict)
                     for ix,grad in enumerate(gradBuffer):
@@ -128,7 +133,7 @@ with tf.Session() as sess:
 	  _valid_mean = np.mean(valid_running_reward)
 	  doc_ = { 'ep':i,'mean':_mean,'std':_std, 'test_mean':_test_mean, 'valid_mean':_valid_mean }
 	  print doc_
-#	  col.insert_one(doc_)
+	  col.insert_one(doc_)
           total_reward = []
         i += 1
 
