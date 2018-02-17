@@ -19,8 +19,11 @@ class agent():
         #These lines established the feed-forward part of the network. The agent takes a state and produces an action.
         self.state_in= tf.placeholder(shape=[None,s_size],dtype=tf.float32)
         hidden = slim.fully_connected(self.state_in,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
-        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
-        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
+#        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
+#        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
+#        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
+#        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
+
         self.output = slim.fully_connected(hidden,a_size,activation_fn=tf.nn.softmax,biases_initializer=None)
         self.chosen_action = tf.argmax(self.output,1)
 
@@ -32,7 +35,7 @@ class agent():
         self.indexes = tf.range(0, tf.shape(self.output)[0]) * tf.shape(self.output)[1] + self.action_holder
         self.responsible_outputs = tf.gather(tf.reshape(self.output, [-1]), self.indexes)
 
-        self.loss = -tf.reduce_mean(tf.log(self.responsible_outputs)*self.reward_holder)
+        self.loss = -tf.reduce_mean(tf.log(self.responsible_outputs)*(self.reward_holder - tf.reduce_mean(self.reward_holder)))
         
         tvars = tf.trainable_variables()
         self.gradient_holders = []

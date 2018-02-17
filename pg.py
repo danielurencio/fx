@@ -11,18 +11,19 @@ import sys
 
 token = "e77055f347d78cf98d75dbd2f5db5821-9eeb3a18e4f8484c84fd6f3267c42b26"
 restore = False
-save = True
+save = False
 model_path = './saved_models/' + sys.argv[1] + '/model_' + sys.argv[1] + '.ckpt'
 
 max_lookback = 48
-#2017-03-06
-dates = ('2017-03-06','2017-12-01')
-#dates = ('2017-01-30','2017-02-02')
+#dates = ('2017-03-06','2017-12-01')
+dates = ('2018-01-15','2018-02-02')
 
 env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
 
-dates_ = ('2017-12-04','2017-12-08')
-dates_valid = ('2017-12-11','2017-12-15')
+#dates_ = ('2017-12-04','2017-12-08')
+#dates_valid = ('2017-12-11','2017-12-15')
+dates_ = ('2018-02-05','2018-02-09')
+dates_valid = ('2018-02-12','2018-02-16')
 
 env_ = MarketEnv(token,dates_,normalization=env,max_lookback=max_lookback)
 env__ = MarketEnv(token,dates_valid,normalization=env,max_lookback=max_lookback)
@@ -32,7 +33,7 @@ lr = 1e-4
 tf.reset_default_graph() #Clear the Tensorflow graph.
 
 
-myAgent = agent(lr=lr,s_size=env.reset().shape[0],a_size=3,h_size=120) #Load the agent.
+myAgent = agent(lr=lr,s_size=env.reset().shape[0],a_size=3,h_size=200)#120) #Load the agent.
 
 total_episodes = 50000000 #Set total number of episodes to train agent on.
 max_ep = 999
@@ -78,7 +79,11 @@ with tf.Session() as sess:
             if d == True:
                 #Update the network.
                 ep_history = np.array(ep_history)
-                ep_history[:,2] = discount_rewards(ep_history[:,2])
+#	        ep_history[:,2] = np.array([ np.sum( discount_rewards(ep_history[ind:,2]) ) for ind,d in enumerate(ep_history[:,2]) ])
+	        ep_history[:,2] = np.array([ np.sum( ep_history[ind:,2])  for ind,d in enumerate(ep_history[:,2]) ])
+
+#                ep_history[:,2] = discount_rewards(ep_history[:,2])
+#		ep_history[:,2] = ( ep_history[:,2] - np.mean(ep_history[:,2]) ) / np.std(ep_history[:,2])
                 feed_dict={myAgent.reward_holder:ep_history[:,2],
                         myAgent.action_holder:ep_history[:,1],myAgent.state_in:np.vstack(ep_history[:,0])}
                 grads = sess.run(myAgent.gradients, feed_dict=feed_dict)
@@ -87,8 +92,8 @@ with tf.Session() as sess:
 
                 if i % update_frequency == 0 and i != 0:
 #########################################################################################################33#
-                    for idx,grad in enumerate(grads):
-                      gradBuffer[idx] /= update_frequency
+                   # for idx,grad in enumerate(grads):
+                  #    gradBuffer[idx] /= update_frequency
 #########################################################################################################33#
 
                     feed_dict =  dict(zip(myAgent.gradient_holders, gradBuffer))
@@ -118,8 +123,12 @@ with tf.Session() as sess:
 	    a_dist__ = sess.run(myAgent.output,feed_dict={myAgent.state_in:[s__]})
 	    a_ = np.argmax(a_dist_)
 	    a__ = np.argmax(a_dist__)
+
 #	    a_ = np.random.choice(a_dist_[0],p=a_dist_[0])
 #	    a_ = np.argmax(a_dist_ == a_)
+#	    a__ = np.random.choice(a_dist__[0],p=a_dist__[0])
+#	    a__ = np.argmax(a_dist__ == a__)
+
 	    s1_,r_,test_on = env_.step(a_)
 	    s1__,r__,test_on_ = env__.step(a__)
 	    s_ = s1_
@@ -133,7 +142,7 @@ with tf.Session() as sess:
 	  _valid_mean = np.mean(valid_running_reward)
 	  doc_ = { 'ep':i,'mean':_mean,'std':_std, 'test_mean':_test_mean, 'valid_mean':_valid_mean }
 	  print doc_
-	  col.insert_one(doc_)
+#	  col.insert_one(doc_)
           total_reward = []
         i += 1
 

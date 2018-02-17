@@ -22,9 +22,10 @@ class MarketEnv:
 
   def get_data(self):
     data = get_candles(self.dates,self.token)
-    fn = lambda x:[x['openAsk'],x['highAsk'],x['closeAsk'],x['lowAsk']]#,parser.parse(x['time']).hour]
+#    fn = lambda x:[x['openAsk'],x['highAsk'],x['closeAsk'],x['lowAsk']]#,parser.parse(x['time']).hour]
+    fn = lambda x:x['closeAsk']
     self.hours = np.array(map(lambda x:parser.parse(x['time']).hour,data))
-    self.candles = np.array(map(fn,data))
+    self.candles = np.vstack(np.array(map(fn,data)))
 #    a = self.series(candles)
 #    b = self.series_(candles)
 #    return np.hstack((a,b))
@@ -46,7 +47,7 @@ class MarketEnv:
     for ma in self.mas:
       lowerBound = ma - min(self.mas)
       self.lookback = ma
-      serie = self.series_(self.candles[:,2])
+      serie = self.series_(self.candles[:,0])
       serie = map(lambda x:np.mean(x),serie)
       serie = np.vstack(serie)
       _series.append(serie)
@@ -66,7 +67,7 @@ class MarketEnv:
     for i in xrange(data.shape[1]):
       arr.append(self.series_(data[:,i]))
     data = np.hstack(arr)
-    self.closingPriceIndex = (3 * self.max_lookback) - 1
+    self.closingPriceIndex = (1 * self.max_lookback) - 1
     if self.normalization == True: # ---------------------------------------------   normalization fix
       self.scaler = preprocessing.StandardScaler().fit(data)
       data = self.scaler.transform(data)
