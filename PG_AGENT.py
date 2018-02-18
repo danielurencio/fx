@@ -19,7 +19,7 @@ class agent():
         #These lines established the feed-forward part of the network. The agent takes a state and produces an action.
         self.state_in= tf.placeholder(shape=[None,s_size],dtype=tf.float32)
         hidden = slim.fully_connected(self.state_in,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
-#        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
+        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
 #        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
 #        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
 #        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
@@ -45,7 +45,7 @@ class agent():
         
         self.gradients = tf.gradients(self.loss,tvars)
         
-        optimizer = tf.train.AdamOptimizer(learning_rate=lr)
+        optimizer = tf.train.RMSPropOptimizer(learning_rate=lr)#AdamOptimizer(learning_rate=lr)
         self.update_batch = optimizer.apply_gradients(zip(self.gradient_holders,tvars))
 
 

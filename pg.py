@@ -17,9 +17,12 @@ model_path = './saved_models/' + sys.argv[1] + '/model_' + sys.argv[1] + '.ckpt'
 
 max_lookback = 48
 
-dates = (sys.argv[2],timeParser(sys.argv[2],4))
-dates_ = (timeParser(sys.argv[2],7),timeParser(sys.argv[2],11))
-dates_valid = (timeParser(sys.argv[2],14),timeParser(sys.argv[2],18))
+dates = ('2016-08-01','2017-01-27')
+#dates = (sys.argv[2],timeParser(sys.argv[2],4))
+dates_ = (timeParser(dates[1],3),timeParser(dates[1],7))
+dates_valid = (timeParser(dates[1],10),timeParser(dates[1],14))
+print dates_,dates_valid
+
 
 env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
 env_ = MarketEnv(token,dates_,normalization=env,max_lookback=max_lookback)
@@ -138,8 +141,8 @@ with tf.Session() as sess:
 	  _test_mean = np.mean(test_running_reward)
 	  _valid_mean = np.mean(valid_running_reward)
 	  doc_ = { 'ep':i,'mean':_mean,'std':_std, 'test_mean':_test_mean, 'valid_mean':_valid_mean }
-#	  print doc_
-	  col.insert_one(doc_)
+	  print doc_
+#	  col.insert_one(doc_)
           total_reward = []
         i += 1
 #        if i > int(sys.argv[3]): sys.exit()
