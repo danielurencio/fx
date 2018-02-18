@@ -7,6 +7,7 @@ from sklearn import preprocessing
 from PG_AGENT import agent, discount_rewards
 from models.dqn import MarketEnv
 from pymongo import MongoClient
+from timeParse import timeParser
 import sys
 
 token = "e77055f347d78cf98d75dbd2f5db5821-9eeb3a18e4f8484c84fd6f3267c42b26"
@@ -15,16 +16,12 @@ save = False
 model_path = './saved_models/' + sys.argv[1] + '/model_' + sys.argv[1] + '.ckpt'
 
 max_lookback = 48
-#dates = ('2017-03-06','2017-12-01')
-dates = ('2018-01-15','2018-02-02')
+
+dates = (sys.argv[2],timeParser(sys.argv[2],4))
+dates_ = (timeParser(sys.argv[2],7),timeParser(sys.argv[2],11))
+dates_valid = (timeParser(sys.argv[2],14),timeParser(sys.argv[2],18))
 
 env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
-
-#dates_ = ('2017-12-04','2017-12-08')
-#dates_valid = ('2017-12-11','2017-12-15')
-dates_ = ('2018-02-05','2018-02-09')
-dates_valid = ('2018-02-12','2018-02-16')
-
 env_ = MarketEnv(token,dates_,normalization=env,max_lookback=max_lookback)
 env__ = MarketEnv(token,dates_valid,normalization=env,max_lookback=max_lookback)
 
@@ -80,9 +77,9 @@ with tf.Session() as sess:
                 #Update the network.
                 ep_history = np.array(ep_history)
 #	        ep_history[:,2] = np.array([ np.sum( discount_rewards(ep_history[ind:,2]) ) for ind,d in enumerate(ep_history[:,2]) ])
-	        ep_history[:,2] = np.array([ np.sum( ep_history[ind:,2])  for ind,d in enumerate(ep_history[:,2]) ])
+#	        ep_history[:,2] = np.array([ np.sum( ep_history[ind:,2])  for ind,d in enumerate(ep_history[:,2]) ])
 
-#                ep_history[:,2] = discount_rewards(ep_history[:,2])
+                ep_history[:,2] = discount_rewards(ep_history[:,2])
 #		ep_history[:,2] = ( ep_history[:,2] - np.mean(ep_history[:,2]) ) / np.std(ep_history[:,2])
                 feed_dict={myAgent.reward_holder:ep_history[:,2],
                         myAgent.action_holder:ep_history[:,1],myAgent.state_in:np.vstack(ep_history[:,0])}
@@ -92,8 +89,8 @@ with tf.Session() as sess:
 
                 if i % update_frequency == 0 and i != 0:
 #########################################################################################################33#
-                   # for idx,grad in enumerate(grads):
-                  #    gradBuffer[idx] /= update_frequency
+                    for idx,grad in enumerate(grads):
+                      gradBuffer[idx] /= update_frequency
 #########################################################################################################33#
 
                     feed_dict =  dict(zip(myAgent.gradient_holders, gradBuffer))
@@ -141,8 +138,9 @@ with tf.Session() as sess:
 	  _test_mean = np.mean(test_running_reward)
 	  _valid_mean = np.mean(valid_running_reward)
 	  doc_ = { 'ep':i,'mean':_mean,'std':_std, 'test_mean':_test_mean, 'valid_mean':_valid_mean }
-	  print doc_
-#	  col.insert_one(doc_)
+#	  print doc_
+	  col.insert_one(doc_)
           total_reward = []
         i += 1
+#        if i > int(sys.argv[3]): sys.exit()
 

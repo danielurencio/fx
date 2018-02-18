@@ -35,7 +35,7 @@ class agent():
         self.indexes = tf.range(0, tf.shape(self.output)[0]) * tf.shape(self.output)[1] + self.action_holder
         self.responsible_outputs = tf.gather(tf.reshape(self.output, [-1]), self.indexes)
 
-        self.loss = -tf.reduce_mean(tf.log(self.responsible_outputs)*(self.reward_holder - tf.reduce_mean(self.reward_holder)))
+        self.loss = -tf.reduce_mean(tf.log(self.responsible_outputs)*(self.reward_holder)) #- tf.reduce_mean(self.reward_holder)))
         
         tvars = tf.trainable_variables()
         self.gradient_holders = []
