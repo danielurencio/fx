@@ -17,14 +17,18 @@ def discount_rewards(r):
 class agent():
     def __init__(self, lr, s_size,a_size,h_size):
         #These lines established the feed-forward part of the network. The agent takes a state and produces an action.
-        self.state_in= tf.placeholder(shape=[None,s_size],dtype=tf.float32)
-        hidden = slim.fully_connected(self.state_in,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
-        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
+        _seqlens = tf.placeholder(tf.float32,shape=[s_size])
+        self.state_in= tf.placeholder(shape=[None,s_size,1],dtype=tf.float32)
+#        hidden = slim.fully_connected(self.state_in,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
 #        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
 #        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
 #        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
-
-        self.output = slim.fully_connected(hidden,a_size,activation_fn=tf.nn.softmax,biases_initializer=None)
+#        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
+	lstm_cell = tf.contrib.rnn.BasicLSTMCell(h_size)
+	outputs,states = tf.nn.dynamic_rnn(lstm_cell,self.state_in,dtype=tf.float32)
+	outputs = tf.transpose(outputs,[1,0,2])
+	last = tf.gather(outputs,int(outputs.get_shape()[0])-1)
+        self.output = slim.fully_connected(last,a_size,activation_fn=tf.nn.softmax,biases_initializer=None)
         self.chosen_action = tf.argmax(self.output,1)
 
         #The next six lines establish the training proceedure. We feed the reward and chosen action into the network
