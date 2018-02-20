@@ -17,8 +17,8 @@ model_path = './saved_models/' + sys.argv[1] + '/model_' + sys.argv[1] + '.ckpt'
 
 max_lookback = 24
 
-dates = ('2017-01-23','2017-01-27')
-#dates = (sys.argv[2],timeParser(sys.argv[2],4))
+#dates = ('2017-01-23','2017-01-27')
+dates = (sys.argv[2],timeParser(sys.argv[2],4))
 dates_ = (timeParser(dates[1],3),timeParser(dates[1],7))
 dates_valid = (timeParser(dates[1],10),timeParser(dates[1],14))
 print dates_,dates_valid
@@ -28,7 +28,7 @@ env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
 env_ = MarketEnv(token,dates_,normalization=env,max_lookback=max_lookback)
 env__ = MarketEnv(token,dates_valid,normalization=env,max_lookback=max_lookback)
 
-lr = 1e-4
+lr = 1e-5
 
 tf.reset_default_graph() #Clear the Tensorflow graph.
 
@@ -85,7 +85,8 @@ with tf.Session() as sess:
 #	        ep_history[:,2] = np.array([ np.sum( ep_history[ind:,2])  for ind,d in enumerate(ep_history[:,2]) ])
 
                 ep_history[:,2] = discount_rewards(ep_history[:,2])
-#		ep_history[:,2] = ( ep_history[:,2] - np.mean(ep_history[:,2]) ) / np.std(ep_history[:,2])
+#	        std = 1 if np.std(ep_history[:,2]) == 0 else np.std(ep_history[:,2])
+#		ep_history[:,2] = ( ep_history[:,2] - np.mean(ep_history[:,2])  / std)
                 feed_dict={myAgent.reward_holder:ep_history[:,2],
                         myAgent.action_holder:ep_history[:,1],myAgent.state_in:np.vstack(ep_history[:,0])}
                 grads = sess.run(myAgent.gradients, feed_dict=feed_dict)
@@ -151,8 +152,8 @@ with tf.Session() as sess:
 	  _valid_mean = np.mean(valid_running_reward)
 	  doc_ = { 'ep':i,'mean':_mean,'std':_std, 'test_mean':_test_mean, 'valid_mean':_valid_mean }
 	  print doc_
-#	  col.insert_one(doc_)
+	  col.insert_one(doc_)
           total_reward = []
         i += 1
-#        if i > int(sys.argv[3]): sys.exit()
+        if i > int(7000): sys.exit()
 
