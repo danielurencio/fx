@@ -6,3 +6,7 @@ def mondays(year):
                          freq='W-MON').strftime('%Y-%m-%d').tolist()
     fechas = pd.DataFrame({ 'fechas': np.array(fechas) })
     return fechas
+
+
+if __name__ == "__main__":
+  mondays(2017).to_csv("fechas.csv",index=False, header=False)

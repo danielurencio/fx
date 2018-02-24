@@ -17,8 +17,8 @@ model_path = './saved_models/' + sys.argv[1] + '/model_' + sys.argv[1] + '.ckpt'
 
 max_lookback = 48
 
-dates = ('2017-07-03','2018-01-05')
-#dates = (sys.argv[2],timeParser(sys.argv[2],25))
+#dates = ('2017-07-03','2018-01-05')
+dates = (sys.argv[2],timeParser(sys.argv[2],25))
 dates_ = (timeParser(dates[1],3),timeParser(dates[1],7))
 dates_valid = (timeParser(dates[1],10),timeParser(dates[1],14))
 print dates_,dates_valid
