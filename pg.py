@@ -15,10 +15,10 @@ restore = False
 save = False
 model_path = './saved_models/' + sys.argv[1] + '/model_' + sys.argv[1] + '.ckpt'
 
-max_lookback = 24
+max_lookback = 48
 
-#dates = ('2017-01-23','2017-01-27')
-dates = (sys.argv[2],timeParser(sys.argv[2],4))
+dates = ('2017-07-03','2018-01-05')
+#dates = (sys.argv[2],timeParser(sys.argv[2],25))
 dates_ = (timeParser(dates[1],3),timeParser(dates[1],7))
 dates_valid = (timeParser(dates[1],10),timeParser(dates[1],14))
 print dates_,dates_valid
@@ -155,5 +155,5 @@ with tf.Session() as sess:
 	  col.insert_one(doc_)
           total_reward = []
         i += 1
-        if i > int(7000): sys.exit()
+#        if i > int(7000): sys.exit()
 
