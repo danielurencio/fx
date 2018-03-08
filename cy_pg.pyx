@@ -1,11 +1,13 @@
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 import numpy as np
+cimport numpy as cnp
 import matplotlib.pyplot as plt
 from timeit import default_timer as timer
 from sklearn import preprocessing
 from PG_AGENT import agent, discount_rewards
 from models.dqn import MarketEnv
+from envs.cy_env import MarketEnv as MarketEnv_
 from pymongo import MongoClient
 from timeParse import timeParser
 import sys
@@ -14,8 +16,8 @@ import sys
 
 token = "e77055f347d78cf98d75dbd2f5db5821-9eeb3a18e4f8484c84fd6f3267c42b26"
 
-restore = True
-save = True
+restore = False
+save = False
 mongo_save = False
 
 model_name = "a"#sys.argv[1]
@@ -23,14 +25,14 @@ model_path = './saved_models/' + model_name + '/model_' + model_name + '.ckpt'
 
 max_lookback = 48
 
-dates = ('2017-04-03','2018-01-05')
+dates = ('2017-07-03','2018-01-05')
 #dates = (sys.argv[2],timeParser(sys.argv[2],25))
 dates_ = (timeParser(dates[1],3),timeParser(dates[1],7))
 dates_valid = (timeParser(dates[1],10),timeParser(dates[1],14))
 print dates_,dates_valid
 
 
-env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
+env = MarketEnv_(token,dates,normalization=True,max_lookback=max_lookback)
 env_ = MarketEnv(token,dates_,normalization=env,max_lookback=max_lookback)
 env__ = MarketEnv(token,dates_valid,normalization=env,max_lookback=max_lookback)
 
@@ -53,8 +55,16 @@ saver = tf.train.Saver()
 init = tf.global_variables_initializer()
 
 # Launch the tensorflow graph
-#def Train():
-with tf.Session() as sess:
+def Train():
+  cdef int i
+  cdef float running_reward
+  cdef list ep_history_
+  cdef cnp.ndarray s
+  cdef cnp.ndarray s1
+  cdef int a
+  cdef float r
+
+  with tf.Session() as sess:
     if restore:
       saver.restore(sess,model_path)
     else:
@@ -70,27 +80,27 @@ with tf.Session() as sess:
         gradBuffer[ix] = grad * 0
         
     while True:
-#        CUT_A = timer()
+        CUT_A = timer()
         s = env.reset()
         s = s.reshape(1,s.shape[0],1)
         running_reward = 0
-        ep_history = []
+        ep_history_ = []
         while True:
 #        for j in range(max_ep):
             #Probabilistically pick an action given our network outputs.
             a_dist = sess.run(myAgent.output,feed_dict={myAgent.state_in:s})
-            a = np.random.choice(a_dist[0],p=a_dist[0])
-            a = np.argmax(a_dist == a)
+            a_ = np.random.choice(a_dist[0],p=a_dist[0])
+            a = np.argmax(a_dist == a_)
             s1,r,d = env.step(a) #Get our reward for taking an action given a bandit.
-            ep_history.append([s,a,r,s1])
+            ep_history_.append([s,a,r,s1])
             s = s1
             s = s.reshape(1,s.shape[0],1)
             running_reward += r
             if d == True:
-#                CUT_B = timer()
-#                print CUT_B - CUT_A
+                CUT_B = timer()
+                print CUT_B - CUT_A
                 #Update the network.
-                ep_history = np.array(ep_history)
+                ep_history = np.array(ep_history_)
 #	        ep_history[:,2] = np.array([ np.sum( discount_rewards(ep_history[ind:,2]) ) for ind,d in enumerate(ep_history[:,2]) ])
 #	        ep_history[:,2] = np.array([ np.sum( ep_history[ind:,2])  for ind,d in enumerate(ep_history[:,2]) ])
 
@@ -167,5 +177,5 @@ with tf.Session() as sess:
         i += 1
 #        if i > int(7000): sys.exit()
 
-#if __name__ == "__main__":
-#  Train()
+if __name__ == "__main__":
+  Train()
