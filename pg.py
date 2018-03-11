@@ -18,12 +18,14 @@ restore = True
 save = True
 mongo_save = False
 
-model_name = "a"#sys.argv[1]
+model_name = "b"#sys.argv[1]
 model_path = './saved_models/' + model_name + '/model_' + model_name + '.ckpt'
 
 max_lookback = 48
 
-dates = ('2017-04-03','2018-01-05')
+#dates = ('2017-04-03','2018-01-05')
+
+dates = ('2017-12-27','2018-01-05')
 #dates = (sys.argv[2],timeParser(sys.argv[2],25))
 dates_ = (timeParser(dates[1],3),timeParser(dates[1],7))
 dates_valid = (timeParser(dates[1],10),timeParser(dates[1],14))

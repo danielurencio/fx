@@ -17,8 +17,9 @@ class MarketEnv:
     self.hours_ = self.Hours()
     self.closing_prices = self.closingPrices()
     self.count = 1
-    self.balance = 100
-    self.units = self.balance * 1
+    self.balance = 0
+    self.monto = 100
+    self.units = self.monto * 1
     self.trade = []
 
   def get_data(self):
@@ -26,6 +27,7 @@ class MarketEnv:
 #    fn = lambda x:[x['openAsk'],x['highAsk'],x['closeAsk'],x['lowAsk']]#,parser.parse(x['time']).hour]
     fn = lambda x:x['closeAsk']
     self.hours = np.array(map(lambda x:parser.parse(x['time']).hour,data))
+    self.date_strings = np.array(map(lambda x:x["time"],data))
     self.candles = np.vstack(np.array(map(fn,data)))
 #    a = self.series(candles)
 #    b = self.series_(candles)
@@ -38,6 +40,10 @@ class MarketEnv:
   def closingPrices(self):
     dif = self.candles.shape[0] - self.data.shape[0]
     return self.candles[dif:]
+
+  def Dates(self):
+    dif = self.date_strings.shape[0] - self.data.shape[0]
+    return self.date_strings[dif:]
 
   def series_(self,data):
     series = []
@@ -126,6 +132,7 @@ class MarketEnv:
 	remainder = 0
       reward = self.reward_signal(state,action) + remainder
       done = True
+    self.monto += reward
     return state,reward,done
 
   def tradeType(self):
@@ -138,20 +145,8 @@ class MarketEnv:
       return 0
 
   def State(self,action):
-#    self.previousPrice = self.data[self.count-1][self.closingPriceIndex]
-#    self.currentPrice = self.data[self.count][self.closingPriceIndex]
-#    print self.previousPrice,self.currentPrice
     self.previousPrice = self.closing_prices[self.count-1]
     self.currentPrice = self.closing_prices[self.count]
-#    print self.previousPrice,self.currentPrice
-#    if self.normalization == True: # -----------------------------------     normalization fix
-#      temp_data = self.scaler.inverse_transform(self.data)
-#      self.previousPrice = temp_data[self.count-1][self.closingPriceIndex]
-#      self.currentPrice = temp_data[self.count][self.closingPriceIndex]
-#    elif isinstance(self.normalization,MarketEnv) == True:
-#      temp_data = self.normalization.scaler.inverse_transform(self.data)
-#      self.previousPrice = temp_data[self.count-1][self.closingPriceIndex]
-#      self.currentPrice = temp_data[self.count][self.closingPriceIndex]
     if( len(self.trade) == 0 ):
       if( action == 0 ):
         self.trade.append({ "type":"sell","price":self.previousPrice })

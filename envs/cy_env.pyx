@@ -4,8 +4,10 @@ from dateutil import parser
 from sklearn import preprocessing
 from crypto import crypto
 import numpy as np
+cimport numpy as cnp
 
-class MarketEnv:
+cdef class MarketEnv:
+
   def __init__(self,token,dates,normalization,max_lookback=24):
     self.mas = [8,24]
     self.lookback = None
@@ -107,6 +109,8 @@ class MarketEnv:
     return np.append(state,0)
 
   def step(self,action):
+#    cdef cnp.ndarray state
+#    cdef float reward
     state = self.State(action)
     if( self.count < len(self.data)-1 ):
       reward = self.reward_signal(state,action)
@@ -138,6 +142,7 @@ class MarketEnv:
       return 0
 
   def State(self,action):
+#    cdef cnp.ndarray state
 #    self.previousPrice = self.data[self.count-1][self.closingPriceIndex]
 #    self.currentPrice = self.data[self.count][self.closingPriceIndex]
 #    print self.previousPrice,self.currentPrice
@@ -166,10 +171,11 @@ class MarketEnv:
         self.balance = self.currentPrice - self.trade[0]["price"]
     self.balance *= self.units
     state = np.append(self.data[self.count],self.tradeType())
-    return np.append(state,self.balance)
-#    return state
+    state = np.append(state,self.balance)
+    return state
 
   def reward_signal(self,state,action):
+#    cdef float reward
     if( len(self.trade) == 0 ):
       reward = 0
     else:

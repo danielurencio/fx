@@ -57,20 +57,25 @@ init = tf.global_variables_initializer()
 # Launch the tensorflow graph
 def Train():
   cdef int i
+  cdef int N
   cdef float running_reward
-  cdef list ep_history_
-  cdef cnp.ndarray s
-  cdef cnp.ndarray s1
-  cdef int a
+#  cdef list ep_history_
+#  cdef cnp.ndarray s
+#  cdef cnp.ndarray s1
+#  cdef:
+#    int a
+#    int a_
   cdef float r
 
+
+  N = env.data.shape[0]
   with tf.Session() as sess:
     if restore:
       saver.restore(sess,model_path)
     else:
       sess.run(init)
 
-    i = 0
+#    i = 0
     total_reward = []
     test_total_reward = []
     total_lenght = []
@@ -85,7 +90,8 @@ def Train():
         s = s.reshape(1,s.shape[0],1)
         running_reward = 0
         ep_history_ = []
-        while True:
+        for i in range(N):
+#        while True:
 #        for j in range(max_ep):
             #Probabilistically pick an action given our network outputs.
             a_dist = sess.run(myAgent.output,feed_dict={myAgent.state_in:s})
@@ -98,7 +104,7 @@ def Train():
             running_reward += r
             if d == True:
                 CUT_B = timer()
-                print CUT_B - CUT_A
+                print CUT_B - CUT_A, "\n"
                 #Update the network.
                 ep_history = np.array(ep_history_)
 #	        ep_history[:,2] = np.array([ np.sum( discount_rewards(ep_history[ind:,2]) ) for ind,d in enumerate(ep_history[:,2]) ])
