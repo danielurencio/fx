@@ -1,3 +1,4 @@
+import json
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 import numpy as np
@@ -14,11 +15,11 @@ import sys
 
 token = "e77055f347d78cf98d75dbd2f5db5821-9eeb3a18e4f8484c84fd6f3267c42b26"
 
-restore = True
+restore = False
 save = True
 mongo_save = False
 
-model_name = "b"#sys.argv[1]
+model_name = "c"#sys.argv[1]
 model_path = './saved_models/' + model_name + '/model_' + model_name + '.ckpt'
 
 max_lookback = 48
@@ -26,10 +27,15 @@ max_lookback = 48
 #dates = ('2017-04-03','2018-01-05')
 
 dates = ('2017-12-27','2018-01-05')
+dates = ('2018-01-01','2018-01-05')
+
 #dates = (sys.argv[2],timeParser(sys.argv[2],25))
+
 dates_ = (timeParser(dates[1],3),timeParser(dates[1],7))
 dates_valid = (timeParser(dates[1],10),timeParser(dates[1],14))
 print dates_,dates_valid
+
+dates = json.load(open('offline_data.json'))
 
 
 env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
@@ -40,6 +46,7 @@ lr = 1e-5
 
 tf.reset_default_graph() #Clear the Tensorflow graph.
 
+dates = ('2017-12-27','2018-01-05')
 
 myAgent = agent(lr=lr,s_size=env.reset().shape[0],a_size=3,h_size=100)#120) #Load the agent.
 

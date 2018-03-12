@@ -19,12 +19,11 @@ class agent():
         #These lines established the feed-forward part of the network. The agent takes a state and produces an action.
         _seqlens = tf.placeholder(tf.float32,shape=[s_size])
         self.state_in= tf.placeholder(shape=[None,s_size,1],dtype=tf.float32)
-#        hidden = slim.fully_connected(self.state_in,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
-#        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
-#        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
-#        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
-#        hidden = slim.fully_connected(hidden,h_size,biases_initializer=None,activation_fn=tf.nn.relu)
-	lstm_cell = tf.contrib.rnn.BasicLSTMCell(h_size)
+
+	def lstm_cell_():
+	  return tf.contrib.rnn.BasicLSTMCell(h_size)
+
+        lstm_cell = tf.contrib.rnn.MultiRNNCell([lstm_cell_() for cell in range(2)])
 	outputs,states = tf.nn.dynamic_rnn(lstm_cell,self.state_in,dtype=tf.float32)
 	outputs = tf.transpose(outputs,[1,0,2])
 	last = tf.gather(outputs,int(outputs.get_shape()[0])-1)
