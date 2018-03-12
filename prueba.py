@@ -8,7 +8,7 @@ from PG_AGENT import agent
 
 token = "e77055f347d78cf98d75dbd2f5db5821-9eeb3a18e4f8484c84fd6f3267c42b26"
 lr = 0
-model_name = "a"
+model_name = "b"
 model_path = './saved_models/' + model_name + '/model_' + model_name + '.ckpt'
 max_lookback = 48
 dates = json.load(open('data_2018-01-08_2018-03-09.json'))
