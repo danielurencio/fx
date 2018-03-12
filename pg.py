@@ -42,13 +42,13 @@ env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
 env_ = MarketEnv(token,dates_,normalization=env,max_lookback=max_lookback)
 env__ = MarketEnv(token,dates_valid,normalization=env,max_lookback=max_lookback)
 
-lr = 1e-5
+lr = 1e-3
 
 tf.reset_default_graph() #Clear the Tensorflow graph.
 
 dates = ('2017-12-27','2018-01-05')
 
-myAgent = agent(lr=lr,s_size=env.reset().shape[0],a_size=3,h_size=100)#120) #Load the agent.
+myAgent = agent(lr=lr,s_size=env.reset().shape[0],a_size=3,h_size=100,stacks=2)
 
 total_episodes = 50000000 #Set total number of episodes to train agent on.
 max_ep = 999

@@ -15,7 +15,7 @@ dates = json.load(open('data_2018-01-08_2018-03-09.json'))
 #dates = ('2018-01-08','2018-03-09')
 #dates = ('2017-07-03','2018-01-05')
 env = MarketEnv(token,dates,normalization=True,max_lookback=max_lookback)
-myAgent = agent(lr=lr,s_size=env.reset().shape[0],a_size=3,h_size=100)
+myAgent = agent(lr=lr,s_size=env.reset().shape[0],a_size=3,h_size=100,stacks=2)
 
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()

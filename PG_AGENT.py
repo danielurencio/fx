@@ -15,7 +15,7 @@ def discount_rewards(r):
 
 
 class agent():
-    def __init__(self, lr, s_size,a_size,h_size):
+    def __init__(self, lr, s_size,a_size,h_size,stacks=1):
         #These lines established the feed-forward part of the network. The agent takes a state and produces an action.
         _seqlens = tf.placeholder(tf.float32,shape=[s_size])
         self.state_in= tf.placeholder(shape=[None,s_size,1],dtype=tf.float32)
@@ -23,7 +23,7 @@ class agent():
 	def lstm_cell_():
 	  return tf.contrib.rnn.BasicLSTMCell(h_size)
 
-        lstm_cell = tf.contrib.rnn.MultiRNNCell([lstm_cell_() for cell in range(2)])
+        lstm_cell = tf.contrib.rnn.MultiRNNCell([lstm_cell_() for cell in range(stacks)])
 	outputs,states = tf.nn.dynamic_rnn(lstm_cell,self.state_in,dtype=tf.float32)
 	outputs = tf.transpose(outputs,[1,0,2])
 	last = tf.gather(outputs,int(outputs.get_shape()[0])-1)
