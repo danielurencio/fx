@@ -6,3 +6,4 @@ views/
 make/*.zip
 *.csv
 *.pyc
+*.json

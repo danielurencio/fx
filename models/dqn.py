@@ -4,6 +4,7 @@ from dateutil import parser
 from sklearn import preprocessing
 from crypto import crypto
 import numpy as np
+import json
 
 class MarketEnv:
   def __init__(self,token,dates,normalization,max_lookback=24):
@@ -23,7 +24,10 @@ class MarketEnv:
     self.trade = []
 
   def get_data(self):
-    data = get_candles(self.dates,self.token)
+    if(not isinstance(self.dates,tuple)):
+      data = self.dates
+    else:
+      data = get_candles(self.dates,self.token)
 #    fn = lambda x:[x['openAsk'],x['highAsk'],x['closeAsk'],x['lowAsk']]#,parser.parse(x['time']).hour]
     fn = lambda x:x['closeAsk']
     self.hours = np.array(map(lambda x:parser.parse(x['time']).hour,data))
