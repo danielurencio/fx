@@ -127,9 +127,9 @@ class MarketEnv:
       self.count += 1
     else:
       if( len(self.trade) > 0 ):
-	if( self.trade[0]["type"] == "sell" ):
+	if( self.trade[0]["type"] == 'sell' ):
 	  remainder = self.trade[0]["price"] - self.currentPrice
-	elif( self.trade[0]["type"] == "buy" ):
+	elif( self.trade[0]["type"] == 'buy' ):
 	  remainder = self.currentPrice - self.trade[0]["price"]
 	remainder *= self.units
       else:
@@ -153,15 +153,15 @@ class MarketEnv:
     self.currentPrice = self.closing_prices[self.count]
     if( len(self.trade) == 0 ):
       if( action == 0 ):
-        self.trade.append({ "type":"sell","price":self.previousPrice })
+        self.trade.append({ 'type':'sell','price':self.previousPrice[0] })
 	self.balance = self.trade[0]["price"] - self.currentPrice
       if( action == 2 ):
-        self.trade.append({ "type":"buy","price":self.previousPrice })
+        self.trade.append({ 'type':'buy','price':self.previousPrice[0] })
 	self.balance = self.currentPrice - self.trade[0]["price"]
     else:
-      if(self.trade[0]['type'] == "sell"):
+      if(self.trade[0]['type'] == 'sell'):
 	self.balance = self.trade[0]["price"] - self.currentPrice
-      elif(self.trade[0]['type'] == "buy"):
+      elif(self.trade[0]['type'] == 'buy'):
 	self.balance = self.currentPrice - self.trade[0]["price"]
     self.balance *= self.units
     state = np.append(self.data[self.count],self.tradeType())

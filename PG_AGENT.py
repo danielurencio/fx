@@ -23,7 +23,11 @@ class agent():
 	def lstm_cell_():
 	  return tf.contrib.rnn.BasicLSTMCell(h_size)
 
-        lstm_cell = tf.contrib.rnn.MultiRNNCell([lstm_cell_() for cell in range(stacks)])
+	if(stacks == 1):
+	  lstm_cell = tf.contrib.rnn.BasicLSTMCell(h_size)
+	else:
+          lstm_cell = tf.contrib.rnn.MultiRNNCell([lstm_cell_() for cell in range(stacks)])
+
 	outputs,states = tf.nn.dynamic_rnn(lstm_cell,self.state_in,dtype=tf.float32)
 	outputs = tf.transpose(outputs,[1,0,2])
 	last = tf.gather(outputs,int(outputs.get_shape()[0])-1)
@@ -38,7 +42,8 @@ class agent():
         self.indexes = tf.range(0, tf.shape(self.output)[0]) * tf.shape(self.output)[1] + self.action_holder
         self.responsible_outputs = tf.gather(tf.reshape(self.output, [-1]), self.indexes)
 
-        self.loss = -tf.reduce_mean(tf.log(self.responsible_outputs)*(self.reward_holder)) #- tf.reduce_mean(self.reward_holder)))
+#        self.loss = -tf.reduce_mean(tf.log(self.responsible_outputs)*(self.reward_holder)) #- tf.reduce_mean(self.reward_holder)))
+        self.loss = -tf.reduce_mean(tf.log(self.responsible_outputs)*(self.reward_holder - tf.reduce_mean(self.reward_holder)))
         
         tvars = tf.trainable_variables()
         self.gradient_holders = []
@@ -48,7 +53,8 @@ class agent():
         
         self.gradients = tf.gradients(self.loss,tvars)
         
-        optimizer = tf.train.RMSPropOptimizer(learning_rate=lr)#AdamOptimizer(learning_rate=lr)
+        optimizer = tf.train.RMSPropOptimizer(learning_rate=lr)
+        #optimizer = tf.train.AdamOptimizer(learning_rate=lr)
         self.update_batch = optimizer.apply_gradients(zip(self.gradient_holders,tvars))
 
 
